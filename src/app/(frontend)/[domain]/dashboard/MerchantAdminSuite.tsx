@@ -63,8 +63,9 @@ function InnerMerchantAdminSuite({
   >(initialProductSubSub);
 
   const [activeSiteBuilderSubTab, setActiveSiteBuilderSubTab] = useState<
-    'header-footer' | 'landing-pages' | 'theme-blocks'
+    'navigation' | 'branding' | 'conversion'
   >(initialSiteBuilderSub);
+
 
   // Sync state with URL
   useEffect(() => {
@@ -153,9 +154,8 @@ function InnerMerchantAdminSuite({
       {toast.show && (
         <div className="fixed bottom-6 right-6 z-50 animate-bounce">
           <div
-            className={`px-5 py-3.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-3 border text-white ${
-              toast.type === 'success' ? 'bg-[#8A1538] border-[#8A1538]' : 'bg-rose-700 border-rose-600'
-            }`}
+            className={`px-5 py-3.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-3 border text-white ${toast.type === 'success' ? 'bg-[#8A1538] border-[#8A1538]' : 'bg-rose-700 border-rose-600'
+              }`}
           >
             <span>{toast.type === 'success' ? '✅' : '⚠️'}</span>
             <span>{toast.msg}</span>
@@ -173,9 +173,8 @@ function InnerMerchantAdminSuite({
 
       {/* 1. AUTHENTIC DARK SIDEBAR (w-[280px] & Clean Professional SVG Icons) */}
       <aside
-        className={`fixed lg:static top-0 bottom-0 left-0 z-50 w-[280px] h-full bg-[#2B2927] text-gray-300 flex flex-col shrink-0 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } border-r border-stone-800/80 shadow-2xl`}
+        className={`fixed lg:static top-0 bottom-0 left-0 z-50 w-[280px] h-full bg-[#2B2927] text-gray-300 flex flex-col shrink-0 transition-transform duration-300 ease-in-out lg:translate-x-0 ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } border-r border-stone-800/80 shadow-2xl`}
       >
         {/* Brand Header */}
         <div className="p-6 border-b border-stone-800/80 flex items-center justify-between shrink-0">
@@ -210,11 +209,10 @@ function InnerMerchantAdminSuite({
           {/* TAB 1: Overview */}
           <button
             onClick={() => handleMainTabChange('overview')}
-            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${
-              activeTab === 'overview'
+            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === 'overview'
                 ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
-            }`}
+              }`}
           >
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -226,11 +224,10 @@ function InnerMerchantAdminSuite({
           <div>
             <button
               onClick={() => handleMainTabChange('ecommerce')}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group ${
-                activeTab === 'ecommerce'
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group ${activeTab === 'ecommerce'
                   ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3.5">
                 <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,9 +237,8 @@ function InnerMerchantAdminSuite({
               </div>
               {/* Professional SVG Chevron Angle Bracket */}
               <svg
-                className={`w-4 h-4 transition-transform duration-200 shrink-0 ${
-                  activeTab === 'ecommerce' ? 'rotate-180 text-white' : 'text-stone-400 group-hover:text-white'
-                }`}
+                className={`w-4 h-4 transition-transform duration-200 shrink-0 ${activeTab === 'ecommerce' ? 'rotate-180 text-white' : 'text-stone-400 group-hover:text-white'
+                  }`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -256,11 +252,10 @@ function InnerMerchantAdminSuite({
               <div className="pl-3.5 mt-1.5 space-y-1 border-l-2 border-[#8A1538]/50 ml-5">
                 <button
                   onClick={() => handleEcomSubTabChange('orders')}
-                  className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center justify-between gap-2.5 ${
-                    activeEcomSubTab === 'orders'
+                  className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center justify-between gap-2.5 ${activeEcomSubTab === 'orders'
                       ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
                       : 'text-gray-400 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -278,11 +273,10 @@ function InnerMerchantAdminSuite({
                 <div>
                   <button
                     onClick={() => handleEcomSubTabChange('products')}
-                    className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center justify-between gap-2.5 ${
-                      activeEcomSubTab === 'products'
+                    className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center justify-between gap-2.5 ${activeEcomSubTab === 'products'
                         ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
                         : 'text-gray-400 hover:text-white'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -336,11 +330,10 @@ function InnerMerchantAdminSuite({
                         <button
                           key={sub.id}
                           onClick={() => handleProductSubSubTabChange(sub.id as any)}
-                          className={`w-full text-left py-1.5 px-2.5 rounded-md transition-all flex items-center gap-2 ${
-                            activeProductSubTab === sub.id
+                          className={`w-full text-left py-1.5 px-2.5 rounded-md transition-all flex items-center gap-2 ${activeProductSubTab === sub.id
                               ? 'bg-stone-800 text-white font-extrabold border-l-2 border-[#E5B361]'
                               : 'text-gray-400 hover:text-gray-200'
-                          }`}
+                            }`}
                         >
                           <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sub.icon} />
@@ -354,11 +347,10 @@ function InnerMerchantAdminSuite({
 
                 <button
                   onClick={() => handleEcomSubTabChange('payments')}
-                  className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center gap-2.5 ${
-                    activeEcomSubTab === 'payments'
+                  className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center gap-2.5 ${activeEcomSubTab === 'payments'
                       ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
                       : 'text-gray-400 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -368,11 +360,10 @@ function InnerMerchantAdminSuite({
 
                 <button
                   onClick={() => handleEcomSubTabChange('settings')}
-                  className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center gap-2.5 ${
-                    activeEcomSubTab === 'settings'
+                  className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center gap-2.5 ${activeEcomSubTab === 'settings'
                       ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
                       : 'text-gray-400 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -386,11 +377,10 @@ function InnerMerchantAdminSuite({
           {/* TAB 3: Media */}
           <button
             onClick={() => handleMainTabChange('media')}
-            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${
-              activeTab === 'media'
+            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === 'media'
                 ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
-            }`}
+              }`}
           >
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -401,11 +391,10 @@ function InnerMerchantAdminSuite({
           {/* TAB 4: Pages */}
           <button
             onClick={() => handleMainTabChange('pages')}
-            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${
-              activeTab === 'pages'
+            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === 'pages'
                 ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
-            }`}
+              }`}
           >
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -416,11 +405,10 @@ function InnerMerchantAdminSuite({
           {/* TAB 5: Analytics */}
           <button
             onClick={() => handleMainTabChange('analytics')}
-            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${
-              activeTab === 'analytics'
+            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === 'analytics'
                 ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
-            }`}
+              }`}
           >
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -432,11 +420,10 @@ function InnerMerchantAdminSuite({
           <div>
             <button
               onClick={() => handleMainTabChange('site-builder')}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group ${
-                activeTab === 'site-builder'
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group ${activeTab === 'site-builder'
                   ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3.5">
                 <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -446,9 +433,8 @@ function InnerMerchantAdminSuite({
               </div>
               {/* Professional SVG Chevron Angle Bracket */}
               <svg
-                className={`w-4 h-4 transition-transform duration-200 shrink-0 ${
-                  activeTab === 'site-builder' ? 'rotate-180 text-white' : 'text-stone-400 group-hover:text-white'
-                }`}
+                className={`w-4 h-4 transition-transform duration-200 shrink-0 ${activeTab === 'site-builder' ? 'rotate-180 text-white' : 'text-stone-400 group-hover:text-white'
+                  }`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -459,40 +445,40 @@ function InnerMerchantAdminSuite({
 
             {activeTab === 'site-builder' && (
               <div className="pl-3.5 mt-1.5 space-y-1 border-l-2 border-[#8A1538]/50 ml-5 text-xs font-semibold">
+                {/* ১. নেভিগেশন (Navigation) */}
                 <button
-                  onClick={() => handleSiteBuilderSubTabChange('header-footer')}
-                  className={`w-full text-left py-2 px-3 rounded-lg transition-all flex items-center gap-2.5 ${
-                    activeSiteBuilderSubTab === 'header-footer' ? 'text-[#E5B361] font-bold bg-stone-800/80' : 'text-gray-400 hover:text-white'
-                  }`}
+                  onClick={() => handleSiteBuilderSubTabChange('navigation')}
+                  className={`w-full text-left py-2 px-3 rounded-lg transition-all flex items-center gap-2.5 ${activeSiteBuilderSubTab === 'navigation' ? 'text-[#E5B361] font-bold bg-stone-800/80' : 'text-gray-400 hover:text-white'
+                    }`}
                 >
                   <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5h16M4 12h16M4 19h16" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
-                  <span>Header & Footer</span>
+                  <span>Navigation</span>
                 </button>
 
+                {/* ২. ব্র্যান্ডিং (Branding) */}
                 <button
-                  onClick={() => handleSiteBuilderSubTabChange('landing-pages')}
-                  className={`w-full text-left py-2 px-3 rounded-lg transition-all flex items-center gap-2.5 ${
-                    activeSiteBuilderSubTab === 'landing-pages' ? 'text-[#E5B361] font-bold bg-stone-800/80' : 'text-gray-400 hover:text-white'
-                  }`}
+                  onClick={() => handleSiteBuilderSubTabChange('branding')}
+                  className={`w-full text-left py-2 px-3 rounded-lg transition-all flex items-center gap-2.5 ${activeSiteBuilderSubTab === 'branding' ? 'text-[#E5B361] font-bold bg-stone-800/80' : 'text-gray-400 hover:text-white'
+                    }`}
+                >
+                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  </svg>
+                  <span>Branding</span>
+                </button>
+
+                {/* ৩. কনভার্সন (Conversion) */}
+                <button
+                  onClick={() => handleSiteBuilderSubTabChange('conversion')}
+                  className={`w-full text-left py-2 px-3 rounded-lg transition-all flex items-center gap-2.5 ${activeSiteBuilderSubTab === 'conversion' ? 'text-[#E5B361] font-bold bg-stone-800/80' : 'text-gray-400 hover:text-white'
+                    }`}
                 >
                   <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  <span>Landing Pages</span>
-                </button>
-
-                <button
-                  onClick={() => handleSiteBuilderSubTabChange('theme-blocks')}
-                  className={`w-full text-left py-2 px-3 rounded-lg transition-all flex items-center gap-2.5 ${
-                    activeSiteBuilderSubTab === 'theme-blocks' ? 'text-[#E5B361] font-bold bg-stone-800/80' : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                  <span>Theme & Custom Blocks</span>
+                  <span>Conversion</span>
                 </button>
               </div>
             )}
@@ -501,11 +487,10 @@ function InnerMerchantAdminSuite({
           {/* TAB 7: Settings */}
           <button
             onClick={() => handleMainTabChange('settings')}
-            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${
-              activeTab === 'settings'
+            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === 'settings'
                 ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
-            }`}
+              }`}
           >
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
