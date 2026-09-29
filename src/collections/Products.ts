@@ -52,12 +52,12 @@ export const Products: CollectionConfig = {
           label: 'General & Pricing',
           fields: [
             { name: 'title', type: 'text', required: true, label: 'Product Title' },
-            { 
-              name: 'slug', 
-              type: 'text', 
-              required: true, 
+            {
+              name: 'slug',
+              type: 'text',
+              required: true,
               label: 'Product Slug (URL)',
-              admin: { description: 'ফাঁকা রাখলে টাইটেল থেকে অটোমেটিক জেনারেট হবে।' } 
+              admin: { description: 'ফাঁকা রাখলে টাইটেল থেকে অটোমেটিক জেনারেট হবে।' }
             },
             {
               name: 'productType',
@@ -117,6 +117,53 @@ export const Products: CollectionConfig = {
             },
           ],
         },
+        {
+          label: 'Attributes & Variations',
+          fields: [
+            {
+              name: 'attributes',
+              type: 'json',
+              label: 'Selected Attributes Data',
+            },
+            {
+              name: 'variations',
+              type: 'array',
+              label: 'Product Variations',
+              fields: [
+                { name: 'sku', type: 'text', label: 'Variant SKU' },
+                { name: 'image', type: 'text', label: 'Variant Image URL' }, // 👈 এই যে ইমেজ ফিল্ড
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'price', type: 'number', required: true, label: 'Regular Price (৳)' },
+                    { name: 'salePrice', type: 'number', label: 'Sale Price (৳)' },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'stockQuantity', type: 'number', defaultValue: 10, label: 'Stock Quantity' },
+                    {
+                      name: 'stockStatus',
+                      type: 'select',
+                      options: [
+                        { label: 'In Stock', value: 'instock' },
+                        { label: 'Out of Stock', value: 'outofstock' },
+                      ],
+                      defaultValue: 'instock',
+                    },
+                  ],
+                },
+                {
+                  name: 'attributes',
+                  type: 'json',
+                  label: 'Variant Attribute Values',
+                },
+              ],
+            },
+          ],
+        }
+
       ],
     },
   ],

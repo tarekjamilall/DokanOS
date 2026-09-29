@@ -205,6 +205,35 @@ export interface Product {
   stockStatus?: ('instock' | 'outofstock') | null;
   manageStock?: boolean | null;
   stockQuantity?: number | null;
+  attributes?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  variations?:
+    | {
+        sku?: string | null;
+        image?: string | null;
+        price: number;
+        salePrice?: number | null;
+        stockQuantity?: number | null;
+        stockStatus?: ('instock' | 'outofstock') | null;
+        attributes?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -520,6 +549,19 @@ export interface ProductsSelect<T extends boolean = true> {
   stockStatus?: T;
   manageStock?: T;
   stockQuantity?: T;
+  attributes?: T;
+  variations?:
+    | T
+    | {
+        sku?: T;
+        image?: T;
+        price?: T;
+        salePrice?: T;
+        stockQuantity?: T;
+        stockStatus?: T;
+        attributes?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
