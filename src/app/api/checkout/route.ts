@@ -70,7 +70,8 @@ export async function POST(request: Request) {
       }
     }
 
-    const unitPrice = product.salePrice || product.price || 0;
+    // ⚡ Type assertion added for salePrice
+    const unitPrice = (product as any).salePrice || product.price || 0;
     const subtotal = unitPrice * quantity;
     const finalShippingCharge =
       shippingCharge !== undefined && shippingCharge !== null
