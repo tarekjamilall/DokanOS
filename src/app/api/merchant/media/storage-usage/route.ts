@@ -26,8 +26,8 @@ export async function GET(request: Request) {
 
     const tenant = tenantQuery.docs[0];
     
-    // ⚡ ZERO HARDCODING: Dynamically read maxStorage from Tenant Subscription Plan
-    const maxStorageMB = tenant.subscriptionPlan?.maxStorage ?? 500;
+    // ⚡ ZERO HARDCODING: Dynamically read storageLimitMB from Tenant Subscription Plan
+    const maxStorageMB = tenant.subscriptionPlan?.storageLimitMB ?? 500;
 
     // 2. Aggregate Total File Size from Media Collection
     const mediaDocs = await payload.find({

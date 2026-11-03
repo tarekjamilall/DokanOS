@@ -103,7 +103,7 @@ export async function POST(request: Request) {
       }
 
       const tenant = tenantQuery.docs[0];
-      const maxStorageMB = tenant.subscriptionPlan?.maxStorage ?? 500;
+      const maxStorageMB = tenant.subscriptionPlan?.storageLimitMB ?? 500;
 
       // 2. Dynamic Storage Limit Pre-check
       const existingMedia = await payload.find({
