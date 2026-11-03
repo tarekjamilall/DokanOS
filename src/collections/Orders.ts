@@ -75,7 +75,7 @@ export const Orders: CollectionConfig = {
       type: 'text',
       required: true,
       unique: true,
-      index: true, // 👈 Step 5: ইনডেক্সড
+      index: true,
       label: 'Order ID / Number',
       admin: {
         readOnly: true,
@@ -86,7 +86,7 @@ export const Orders: CollectionConfig = {
       type: 'relationship',
       relationTo: 'tenants',
       required: true,
-      index: true, // 👈 Step 5: ইনডেক্সড
+      index: true,
       label: 'Merchant Store',
       admin: {
         position: 'sidebar',
@@ -233,6 +233,8 @@ export const Orders: CollectionConfig = {
                   options: [
                     { label: 'Cash on Delivery (COD)', value: 'cod' },
                     { label: 'bKash / Nagad / Rocket', value: 'mfs' },
+                    { label: 'bKash Direct', value: 'bkash' },
+                    { label: 'Nagad Direct', value: 'nagad' },
                     { label: 'Online Card Payment', value: 'card' },
                   ],
                   defaultValue: 'cod',
