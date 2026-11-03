@@ -5,7 +5,7 @@ import configPromise from '@/payload.config';
 // ✏️ PATCH: অর্ডার স্ট্যাটাস, মার্চেন্ট নোট এবং কুরিয়ার ট্র্যাকিং আপডেট
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> } // 👈 Promise টাইপ
 ) {
   try {
     const { id } = await params;
