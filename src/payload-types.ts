@@ -1,3 +1,5 @@
+code of payload-types.ts is here:
+
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -208,6 +210,15 @@ export interface Tenant {
     | number
     | boolean
     | null;
+  headerLinks?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   planType: 'starter' | 'business' | 'enterprise' | 'custom';
   subscriptionPlan?: {
     maxProducts?: number | null;
@@ -230,6 +241,11 @@ export interface Product {
   type: 'simple' | 'variable' | 'digital' | 'external';
   price: number;
   regularPrice?: number | null;
+  salePrice?: number | null;
+  category?: (string | null) | Category;
+  brand?: string | null;
+  digitalFileUrl?: string | null;
+  externalUrl?: string | null;
   images: {
     url: string;
     id?: string | null;
@@ -298,8 +314,10 @@ export interface Order {
   subtotal: number;
   discountAmount?: number | null;
   grandTotal: number;
-  paymentMethod: 'cod' | 'mfs' | 'card';
+  paymentMethod: 'cod' | 'mfs' | 'bkash' | 'nagad' | 'card';
   paymentStatus: 'unpaid' | 'paid' | 'partially-paid';
+  transactionId?: string | null;
+  merchantNote?: string | null;
   courierName?: ('steadfast' | 'pathao' | 'paperfly' | 'manual') | null;
   trackingCode?: string | null;
   orderStatus: 'pending' | 'processing' | 'on-hold' | 'completed' | 'cancelled' | 'refunded' | 'failed';
@@ -598,6 +616,7 @@ export interface TenantsSelect<T extends boolean = true> {
   gtmContainerId?: T;
   ga4MeasurementId?: T;
   apiTokens?: T;
+  headerLinks?: T;
   planType?: T;
   subscriptionPlan?:
     | T
@@ -621,6 +640,11 @@ export interface ProductsSelect<T extends boolean = true> {
   type?: T;
   price?: T;
   regularPrice?: T;
+  salePrice?: T;
+  category?: T;
+  brand?: T;
+  digitalFileUrl?: T;
+  externalUrl?: T;
   images?:
     | T
     | {
@@ -696,6 +720,8 @@ export interface OrdersSelect<T extends boolean = true> {
   grandTotal?: T;
   paymentMethod?: T;
   paymentStatus?: T;
+  transactionId?: T;
+  merchantNote?: T;
   courierName?: T;
   trackingCode?: T;
   orderStatus?: T;
