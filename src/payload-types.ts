@@ -73,6 +73,7 @@ export interface Config {
     orders: Order;
     categories: Category;
     pages: Page;
+    media: Media;
     coupons: Coupon;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -87,6 +88,7 @@ export interface Config {
     orders: OrdersSelect<false> | OrdersSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     coupons: CouponsSelect<false> | CouponsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -145,6 +147,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -166,14 +169,45 @@ export interface Tenant {
   planSummary?: string | null;
   name: string;
   slug: string;
+  customDomain?: string | null;
+  domainVerified?: boolean | null;
   merchantEmail: string;
   contactPhone?: string | null;
   generatedPassword?: string | null;
   brandLogo?: string | null;
-  primaryColor?: ('#4f46e5' | '#059669' | '#dc2626' | '#0f172a' | '#e11d48') | null;
+  favicon?: string | null;
+  primaryColor?: string | null;
+  showAnnouncement?: boolean | null;
   announcementText?: string | null;
+  announcementBg?: string | null;
+  announcementTextColor?: string | null;
+  helplinePhone?: string | null;
   whatsappNumber?: string | null;
+  stickyHeader?: boolean | null;
+  footerAboutText?: string | null;
+  supportPhone?: string | null;
+  supportEmail?: string | null;
+  address?: string | null;
+  copyrightText?: string | null;
+  facebookUrl?: string | null;
+  instagramUrl?: string | null;
+  youtubeUrl?: string | null;
+  showTrustBadges?: boolean | null;
+  customCss?: string | null;
+  customScripts?: string | null;
   metaPixelId?: string | null;
+  facebookCapiToken?: string | null;
+  gtmContainerId?: string | null;
+  ga4MeasurementId?: string | null;
+  apiTokens?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   planType: 'starter' | 'business' | 'enterprise' | 'custom';
   subscriptionPlan?: {
     maxProducts?: number | null;
@@ -191,49 +225,52 @@ export interface Tenant {
  */
 export interface Product {
   id: string;
-  tenant: string | Tenant;
   title: string;
-  /**
-   * ফাঁকা রাখলে টাইটেল থেকে অটোমেটিক জেনারেট হবে।
-   */
   slug: string;
-  productType: 'simple' | 'variable' | 'digital' | 'external';
+  type: 'simple' | 'variable' | 'digital' | 'external';
   price: number;
-  salePrice?: number | null;
-  shortDescription?: string | null;
-  sku?: string | null;
-  stockStatus?: ('instock' | 'outofstock') | null;
-  manageStock?: boolean | null;
-  stockQuantity?: number | null;
+  regularPrice?: number | null;
+  images: {
+    url: string;
+    id?: string | null;
+  }[];
+  description?: string | null;
+  features?:
+    | {
+        featureText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  inventory?: {
+    manageStock?: boolean | null;
+    stockQuantity?: number | null;
+    stockStatus?: ('in_stock' | 'out_of_stock') | null;
+  };
   attributes?:
     | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  variations?:
-    | {
-        sku?: string | null;
-        image?: string | null;
-        price: number;
-        salePrice?: number | null;
-        stockQuantity?: number | null;
-        stockStatus?: ('instock' | 'outofstock') | null;
-        attributes?:
+        name?: string | null;
+        options?:
           | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
+              value?: string | null;
+              id?: string | null;
+            }[]
           | null;
         id?: string | null;
       }[]
     | null;
+  variations?:
+    | {
+        sku?: string | null;
+        color?: string | null;
+        size?: string | null;
+        price: number;
+        regularPrice?: number | null;
+        stockQuantity?: number | null;
+        image?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  tenant: string | Tenant;
   updatedAt: string;
   createdAt: string;
 }
@@ -294,6 +331,9 @@ export interface Page {
   id: string;
   title: string;
   slug: string;
+  content?: string | null;
+  status: 'published' | 'draft';
+  isSystem?: boolean | null;
   isHomepage?: boolean | null;
   isLandingPage?: boolean | null;
   tenant: string | Tenant;
@@ -311,26 +351,10 @@ export interface Page {
           }
         | {
             title?: string | null;
-            category?: (string | null) | Category;
-            limit?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'productGrid';
-          }
-        | {
-            product: string | Product;
-            headline?: string | null;
-            fomoText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'productSpotlight';
-          }
-        | {
-            title?: string | null;
             features?:
               | {
                   icon?: string | null;
-                  title: string;
+                  title?: string | null;
                   description?: string | null;
                   id?: string | null;
                 }[]
@@ -343,9 +367,9 @@ export interface Page {
             title?: string | null;
             reviews?:
               | {
-                  customerName: string;
-                  comment: string;
+                  customerName?: string | null;
                   rating?: number | null;
+                  comment?: string | null;
                   id?: string | null;
                 }[]
               | null;
@@ -357,8 +381,8 @@ export interface Page {
             title?: string | null;
             faqs?:
               | {
-                  question: string;
-                  answer: string;
+                  question?: string | null;
+                  answer?: string | null;
                   id?: string | null;
                 }[]
               | null;
@@ -370,6 +394,32 @@ export interface Page {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt: string;
+  caption?: string | null;
+  mediaType: 'image' | 'video';
+  videoUrl?: string | null;
+  videoPlatform?: ('youtube' | 'vimeo') | null;
+  fileSize?: number | null;
+  tenant: string | Tenant;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -435,6 +485,10 @@ export interface PayloadLockedDocument {
         value: string | Page;
       } | null)
     | ({
+        relationTo: 'media';
+        value: string | Media;
+      } | null)
+    | ({
         relationTo: 'coupons';
         value: string | Coupon;
       } | null);
@@ -494,6 +548,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -512,14 +567,37 @@ export interface TenantsSelect<T extends boolean = true> {
   planSummary?: T;
   name?: T;
   slug?: T;
+  customDomain?: T;
+  domainVerified?: T;
   merchantEmail?: T;
   contactPhone?: T;
   generatedPassword?: T;
   brandLogo?: T;
+  favicon?: T;
   primaryColor?: T;
+  showAnnouncement?: T;
   announcementText?: T;
+  announcementBg?: T;
+  announcementTextColor?: T;
+  helplinePhone?: T;
   whatsappNumber?: T;
+  stickyHeader?: T;
+  footerAboutText?: T;
+  supportPhone?: T;
+  supportEmail?: T;
+  address?: T;
+  copyrightText?: T;
+  facebookUrl?: T;
+  instagramUrl?: T;
+  youtubeUrl?: T;
+  showTrustBadges?: T;
+  customCss?: T;
+  customScripts?: T;
   metaPixelId?: T;
+  facebookCapiToken?: T;
+  gtmContainerId?: T;
+  ga4MeasurementId?: T;
+  apiTokens?: T;
   planType?: T;
   subscriptionPlan?:
     | T
@@ -538,30 +616,56 @@ export interface TenantsSelect<T extends boolean = true> {
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
-  tenant?: T;
   title?: T;
   slug?: T;
-  productType?: T;
+  type?: T;
   price?: T;
-  salePrice?: T;
-  shortDescription?: T;
-  sku?: T;
-  stockStatus?: T;
-  manageStock?: T;
-  stockQuantity?: T;
-  attributes?: T;
+  regularPrice?: T;
+  images?:
+    | T
+    | {
+        url?: T;
+        id?: T;
+      };
+  description?: T;
+  features?:
+    | T
+    | {
+        featureText?: T;
+        id?: T;
+      };
+  inventory?:
+    | T
+    | {
+        manageStock?: T;
+        stockQuantity?: T;
+        stockStatus?: T;
+      };
+  attributes?:
+    | T
+    | {
+        name?: T;
+        options?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   variations?:
     | T
     | {
         sku?: T;
-        image?: T;
+        color?: T;
+        size?: T;
         price?: T;
-        salePrice?: T;
+        regularPrice?: T;
         stockQuantity?: T;
-        stockStatus?: T;
-        attributes?: T;
+        image?: T;
         id?: T;
       };
+  tenant?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -618,6 +722,9 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  content?: T;
+  status?: T;
+  isSystem?: T;
   isHomepage?: T;
   isLandingPage?: T;
   tenant?: T;
@@ -632,24 +739,6 @@ export interface PagesSelect<T extends boolean = true> {
               badgeText?: T;
               imageUrl?: T;
               buttonText?: T;
-              id?: T;
-              blockName?: T;
-            };
-        productGrid?:
-          | T
-          | {
-              title?: T;
-              category?: T;
-              limit?: T;
-              id?: T;
-              blockName?: T;
-            };
-        productSpotlight?:
-          | T
-          | {
-              product?: T;
-              headline?: T;
-              fomoText?: T;
               id?: T;
               blockName?: T;
             };
@@ -676,8 +765,8 @@ export interface PagesSelect<T extends boolean = true> {
                 | T
                 | {
                     customerName?: T;
-                    comment?: T;
                     rating?: T;
+                    comment?: T;
                     id?: T;
                   };
               id?: T;
@@ -700,6 +789,31 @@ export interface PagesSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  caption?: T;
+  mediaType?: T;
+  videoUrl?: T;
+  videoPlatform?: T;
+  fileSize?: T;
+  tenant?: T;
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

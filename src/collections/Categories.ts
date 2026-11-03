@@ -55,6 +55,7 @@ export const Categories: CollectionConfig = {
       name: 'slug',
       type: 'text',
       required: true,
+      index: true,
       label: 'Category Slug',
       admin: { placeholder: 'e.g. men-fashion' },
     },

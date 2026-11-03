@@ -163,7 +163,8 @@ export default function BrandManager({
   };
 
   // Add Brand Handler
-  const handleAddBrand = (e: React.FormEvent) => {
+  // ➕ Add Brand Handler (Steps 103 & 104)
+  const handleAddBrand = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       showToast('Please enter a valid brand name.', 'error');
@@ -171,37 +172,49 @@ export default function BrandManager({
     }
 
     const finalSlug = slug.trim() || bnToEnSlug(name);
-    
-    // Check duplicate slug
+
     if (brands.some((b) => b.slug === finalSlug)) {
-      showToast('A brand with this unique slug already exists!', 'error');
+      showToast('A brand with this slug already exists!', 'error');
       return;
     }
 
-    const newBrandItem: Brand = {
-      id: `brand-${Date.now()}`,
-      name: name.trim(),
-      slug: finalSlug,
-      website: website.trim(),
-      description: description.trim(),
-      logo,
-      isFeatured,
-      productCount: 0,
-    };
+    try {
+      const res = await fetch('/api/merchant/brands', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          slug: finalSlug,
+          website: website.trim(),
+          description: description.trim(),
+          logo,
+          isFeatured,
+        }),
+      });
 
-    const updated = [newBrandItem, ...brands];
-    setBrands(updated);
-    if (onBrandChange) onBrandChange(updated);
+      const data = await res.json();
 
-    // Reset Form
-    setName('');
-    setSlug('');
-    setIsCustomSlug(false);
-    setWebsite('');
-    setDescription('');
-    setLogo('');
-    setIsFeatured(false);
-    showToast('✨ New premium brand added successfully!', 'success');
+      if (res.ok && data.success) {
+        const newBrandItem: Brand = data.brand;
+        const updated = [newBrandItem, ...brands];
+        setBrands(updated);
+        if (onBrandChange) onBrandChange(updated);
+
+        // Reset Form
+        setName('');
+        setSlug('');
+        setIsCustomSlug(false);
+        setWebsite('');
+        setDescription('');
+        setLogo('');
+        setIsFeatured(false);
+        showToast('✨ Brand added successfully!', 'success');
+      } else {
+        showToast(data.error || 'Failed to add brand.', 'error');
+      }
+    } catch (err) {
+      showToast('Network error! Please try again.', 'error');
+    }
   };
 
   // Trigger Delete Confirmation Modal

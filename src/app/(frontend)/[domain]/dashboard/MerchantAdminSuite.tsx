@@ -6,6 +6,9 @@ import { useSearchParams } from 'next/navigation';
 // ============================================================================
 // 🔮 MODULAR COMPONENTS IMPORT SECTION (All imports preserved)
 // ============================================================================
+import AnalyticsTab from '@/components/dashboard/analytics/AnalyticsTab';
+import SiteBuilderTab from '@/components/dashboard/site-builder/SiteBuilderTab';
+import PagesTab from '@/components/dashboard/pages/PagesTab';
 import AddProductForm from '@/components/dashboard/products/AddProductForm';
 import ProductList from '@/components/dashboard/products/ProductList';
 import CategoryManager from '@/components/dashboard/products/CategoryManager';
@@ -15,11 +18,16 @@ import AttributeManager from '@/components/dashboard/products/AttributeManager';
 import CouponManager from '@/components/dashboard/products/CouponManager';
 import OrderList from '@/components/dashboard/orders/OrderList';
 import PaymentSettingsTab from '@/components/dashboard/payment/PaymentSettingsTab';
+import ShippingSettingsTab from '@/components/dashboard/shipping/ShippingSettingsTab';
+import MediaManagerTab from '@/components/dashboard/media/MediaManagerTab';
+import OverviewTab from '@/components/dashboard/overview/OverviewTab';
+import SettingsTab from '@/components/dashboard/settings/SettingsTab';
 
 type MerchantAdminSuiteProps = {
   domain?: string;
   storeName?: string;
   brandLogo?: string;
+  planName?: string;
   orders?: any[];
   products?: any[];
   categories?: any[];
@@ -30,8 +38,9 @@ type MerchantAdminSuiteProps = {
 
 function InnerMerchantAdminSuite({
   domain = '',
-  storeName = 'Online Care Bazar',
+  storeName = 'আমার অনলাইন শপ',
   brandLogo = '',
+  planName = 'Starter Plan', // 👈 এটি যুক্ত করুন
   orders = [],
   products = [],
   categories = [],
@@ -55,7 +64,7 @@ function InnerMerchantAdminSuite({
   >(initialTab);
 
   const [activeEcomSubTab, setActiveEcomSubTab] = useState<
-    'orders' | 'products' | 'payments' | 'settings'
+    'orders' | 'products' | 'shipping' | 'payments' | 'settings'
   >(initialEcomSub);
 
   const [activeProductSubTab, setActiveProductSubTab] = useState<
@@ -66,6 +75,20 @@ function InnerMerchantAdminSuite({
     'navigation' | 'branding' | 'conversion'
   >(initialSiteBuilderSub);
 
+  // 📝 Product Edit State
+  const [editingProduct, setEditingProduct] = useState<any | null>(null);
+
+  const handleEditProduct = (product: any) => {
+    setEditingProduct(product);
+    setActiveEcomSubTab('products');
+    setActiveProductSubTab('add');
+  };
+
+  const handleAddNewProduct = () => {
+    setEditingProduct(null);
+    setActiveEcomSubTab('products');
+    setActiveProductSubTab('add');
+  };
 
   // Sync state with URL
   useEffect(() => {
@@ -210,8 +233,8 @@ function InnerMerchantAdminSuite({
           <button
             onClick={() => handleMainTabChange('overview')}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === 'overview'
-                ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+              ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
           >
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,8 +248,8 @@ function InnerMerchantAdminSuite({
             <button
               onClick={() => handleMainTabChange('ecommerce')}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group ${activeTab === 'ecommerce'
-                  ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
             >
               <div className="flex items-center gap-3.5">
@@ -235,7 +258,6 @@ function InnerMerchantAdminSuite({
                 </svg>
                 <span className="text-sm font-bold">Ecommerce</span>
               </div>
-              {/* Professional SVG Chevron Angle Bracket */}
               <svg
                 className={`w-4 h-4 transition-transform duration-200 shrink-0 ${activeTab === 'ecommerce' ? 'rotate-180 text-white' : 'text-stone-400 group-hover:text-white'
                   }`}
@@ -253,8 +275,8 @@ function InnerMerchantAdminSuite({
                 <button
                   onClick={() => handleEcomSubTabChange('orders')}
                   className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center justify-between gap-2.5 ${activeEcomSubTab === 'orders'
-                      ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
-                      : 'text-gray-400 hover:text-white'
+                    ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
+                    : 'text-gray-400 hover:text-white'
                     }`}
                 >
                   <div className="flex items-center gap-2">
@@ -274,8 +296,8 @@ function InnerMerchantAdminSuite({
                   <button
                     onClick={() => handleEcomSubTabChange('products')}
                     className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center justify-between gap-2.5 ${activeEcomSubTab === 'products'
-                        ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
-                        : 'text-gray-400 hover:text-white'
+                      ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
+                      : 'text-gray-400 hover:text-white'
                       }`}
                   >
                     <div className="flex items-center gap-2">
@@ -287,52 +309,24 @@ function InnerMerchantAdminSuite({
                     <span className="text-stone-400 text-[10px]">({products.length})</span>
                   </button>
 
-                  {/* Sub-sub tabs under Products with SVG Icons */}
+                  {/* Sub-sub tabs under Products */}
                   {activeEcomSubTab === 'products' && (
                     <div className="pl-3 mt-1 space-y-1 text-[11px] font-medium">
                       {[
-                        {
-                          id: 'all',
-                          label: 'All Products',
-                          icon: 'M4 6h16M4 10h16M4 14h16M4 18h16',
-                        },
-                        {
-                          id: 'add',
-                          label: 'Add products',
-                          icon: 'M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z',
-                        },
-                        {
-                          id: 'brands',
-                          label: `Brands (${brands.length})`,
-                          icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5',
-                        },
-                        {
-                          id: 'categories',
-                          label: `Categories (${categories.length})`,
-                          icon: 'M7 7h.01M7 11h.01M7 15h.01M11 7h.01M11 11h.01M11 15h.01M15 7h.01M15 11h.01M15 15h.01',
-                        },
-                        {
-                          id: 'tags',
-                          label: 'Tags',
-                          icon: 'M7 7h.01M7 11h.01M7 15h.01M11 7h.01M11 11h.01M11 15h.01',
-                        },
-                        {
-                          id: 'attributes',
-                          label: 'Attributes',
-                          icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
-                        },
-                        {
-                          id: 'coupon',
-                          label: `Coupon (${coupons.length})`,
-                          icon: 'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z',
-                        },
+                        { id: 'all', label: 'All Products', icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
+                        { id: 'add', label: 'Add products', icon: 'M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z' },
+                        { id: 'brands', label: `Brands (${brands.length})`, icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5' },
+                        { id: 'categories', label: `Categories (${categories.length})`, icon: 'M7 7h.01M7 11h.01M7 15h.01M11 7h.01M11 11h.01M11 15h.01M15 7h.01M15 11h.01M15 15h.01' },
+                        { id: 'tags', label: 'Tags', icon: 'M7 7h.01M7 11h.01M7 15h.01M11 7h.01M11 11h.01M11 15h.01' },
+                        { id: 'attributes', label: 'Attributes', icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4' },
+                        { id: 'coupon', label: `Coupon (${coupons.length})`, icon: 'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z' },
                       ].map((sub) => (
                         <button
                           key={sub.id}
                           onClick={() => handleProductSubSubTabChange(sub.id as any)}
                           className={`w-full text-left py-1.5 px-2.5 rounded-md transition-all flex items-center gap-2 ${activeProductSubTab === sub.id
-                              ? 'bg-stone-800 text-white font-extrabold border-l-2 border-[#E5B361]'
-                              : 'text-gray-400 hover:text-gray-200'
+                            ? 'bg-stone-800 text-white font-extrabold border-l-2 border-[#E5B361]'
+                            : 'text-gray-400 hover:text-gray-200'
                             }`}
                         >
                           <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -345,11 +339,25 @@ function InnerMerchantAdminSuite({
                   )}
                 </div>
 
+                {/* 🚚 Shipping Settings Sub-tab */}
+                <button
+                  onClick={() => handleEcomSubTabChange('shipping')}
+                  className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center gap-2.5 ${activeEcomSubTab === 'shipping'
+                    ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
+                    : 'text-gray-400 hover:text-white'
+                    }`}
+                >
+                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8" />
+                  </svg>
+                  <span>Shipping Settings</span>
+                </button>
+
                 <button
                   onClick={() => handleEcomSubTabChange('payments')}
                   className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center gap-2.5 ${activeEcomSubTab === 'payments'
-                      ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
-                      : 'text-gray-400 hover:text-white'
+                    ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
+                    : 'text-gray-400 hover:text-white'
                     }`}
                 >
                   <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -361,8 +369,8 @@ function InnerMerchantAdminSuite({
                 <button
                   onClick={() => handleEcomSubTabChange('settings')}
                   className={`w-full text-left py-2 px-3 rounded-lg transition-all text-xs font-semibold flex items-center gap-2.5 ${activeEcomSubTab === 'settings'
-                      ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
-                      : 'text-gray-400 hover:text-white'
+                    ? 'text-[#E5B361] font-extrabold bg-stone-800/80'
+                    : 'text-gray-400 hover:text-white'
                     }`}
                 >
                   <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -378,8 +386,8 @@ function InnerMerchantAdminSuite({
           <button
             onClick={() => handleMainTabChange('media')}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === 'media'
-                ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+              ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
           >
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -392,8 +400,8 @@ function InnerMerchantAdminSuite({
           <button
             onClick={() => handleMainTabChange('pages')}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === 'pages'
-                ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+              ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
           >
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -406,8 +414,8 @@ function InnerMerchantAdminSuite({
           <button
             onClick={() => handleMainTabChange('analytics')}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === 'analytics'
-                ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+              ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
           >
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,8 +429,8 @@ function InnerMerchantAdminSuite({
             <button
               onClick={() => handleMainTabChange('site-builder')}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group ${activeTab === 'site-builder'
-                  ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
             >
               <div className="flex items-center gap-3.5">
@@ -431,7 +439,6 @@ function InnerMerchantAdminSuite({
                 </svg>
                 <span className="text-sm font-bold">Site Builder</span>
               </div>
-              {/* Professional SVG Chevron Angle Bracket */}
               <svg
                 className={`w-4 h-4 transition-transform duration-200 shrink-0 ${activeTab === 'site-builder' ? 'rotate-180 text-white' : 'text-stone-400 group-hover:text-white'
                   }`}
@@ -445,7 +452,6 @@ function InnerMerchantAdminSuite({
 
             {activeTab === 'site-builder' && (
               <div className="pl-3.5 mt-1.5 space-y-1 border-l-2 border-[#8A1538]/50 ml-5 text-xs font-semibold">
-                {/* ১. নেভিগেশন (Navigation) */}
                 <button
                   onClick={() => handleSiteBuilderSubTabChange('navigation')}
                   className={`w-full text-left py-2 px-3 rounded-lg transition-all flex items-center gap-2.5 ${activeSiteBuilderSubTab === 'navigation' ? 'text-[#E5B361] font-bold bg-stone-800/80' : 'text-gray-400 hover:text-white'
@@ -457,7 +463,6 @@ function InnerMerchantAdminSuite({
                   <span>Navigation</span>
                 </button>
 
-                {/* ২. ব্র্যান্ডিং (Branding) */}
                 <button
                   onClick={() => handleSiteBuilderSubTabChange('branding')}
                   className={`w-full text-left py-2 px-3 rounded-lg transition-all flex items-center gap-2.5 ${activeSiteBuilderSubTab === 'branding' ? 'text-[#E5B361] font-bold bg-stone-800/80' : 'text-gray-400 hover:text-white'
@@ -469,7 +474,6 @@ function InnerMerchantAdminSuite({
                   <span>Branding</span>
                 </button>
 
-                {/* ৩. কনভার্সন (Conversion) */}
                 <button
                   onClick={() => handleSiteBuilderSubTabChange('conversion')}
                   className={`w-full text-left py-2 px-3 rounded-lg transition-all flex items-center gap-2.5 ${activeSiteBuilderSubTab === 'conversion' ? 'text-[#E5B361] font-bold bg-stone-800/80' : 'text-gray-400 hover:text-white'
@@ -488,8 +492,8 @@ function InnerMerchantAdminSuite({
           <button
             onClick={() => handleMainTabChange('settings')}
             className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === 'settings'
-                ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+              ? 'bg-[#8A1538] text-white shadow-md font-extrabold'
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
           >
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -526,8 +530,21 @@ function InnerMerchantAdminSuite({
         </div>
       </aside>
 
-      {/* 2. MAIN VIEWPORT (Responsive Container with min-w-0 and overflow-x-hidden) */}
+      {/* 2. MAIN VIEWPORT (Responsive Container) */}
       <main className="flex-1 h-full overflow-y-auto bg-[#F6F4EB]/30 min-w-0 flex flex-col overflow-x-hidden">
+        {/* TOP IMPERSONATION NOTIFICATION BANNER (Step 215) */}
+        {searchParams.get('impersonated') === 'true' && (
+          <div className="bg-amber-500 text-slate-950 font-black text-xs px-4 py-2 text-center flex items-center justify-center gap-2 shadow-md shrink-0">
+            <span>⚠️ আপনি বর্তমানে সুপার এডমিন হিসেবে এই মার্চেন্ট স্টোরে ইম্পারসোনেটেড আছেন।</span>
+            <a
+              href="/admin"
+              className="underline text-slate-900 font-extrabold hover:text-black ml-2"
+            >
+              [সেশন বন্ধ করুন ও সুপার এডমিনে ফিরুন]
+            </a>
+          </div>
+        )}
+
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-md border-b border-stone-200/80 px-4 sm:px-6 py-3.5 sticky top-0 z-30 flex items-center justify-between shadow-2xs gap-3 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
@@ -575,147 +592,15 @@ function InnerMerchantAdminSuite({
         <div className="p-3 sm:p-6 max-w-7xl w-full mx-auto space-y-6 flex-1 min-w-0">
           {/* TAB 1: OVERVIEW */}
           {activeTab === 'overview' && (
-            <div className="space-y-6 animate-in fade-in duration-300 min-w-0">
-              {/* Metric Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 sm:p-5 rounded-2xl text-white shadow-md relative overflow-hidden">
-                  <div className="flex justify-between items-center relative z-10">
-                    <div>
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-100 block">মোট আয় (SALES)</span>
-                      <h3 className="text-xl sm:text-2xl font-black mt-1">৳{totalSales}</h3>
-                    </div>
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center text-base sm:text-lg backdrop-blur-xs">
-                      💵
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-amber-400 to-orange-500 p-4 sm:p-5 rounded-2xl text-white shadow-md relative overflow-hidden">
-                  <div className="flex justify-between items-center relative z-10">
-                    <div>
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-100 block">মোট অর্ডার</span>
-                      <h3 className="text-xl sm:text-2xl font-black mt-1">{orders.length}</h3>
-                    </div>
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center text-base sm:text-lg backdrop-blur-xs">
-                      🛍️
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-emerald-400 to-teal-500 p-4 sm:p-5 rounded-2xl text-white shadow-md relative overflow-hidden">
-                  <div className="flex justify-between items-center relative z-10">
-                    <div>
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-100 block">মোট প্রোডাক্ট</span>
-                      <h3 className="text-xl sm:text-2xl font-black mt-1">{products.length}</h3>
-                    </div>
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center text-base sm:text-lg backdrop-blur-xs">
-                      📦
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-rose-500 to-red-600 p-4 sm:p-5 rounded-2xl text-white shadow-md relative overflow-hidden">
-                  <div className="flex justify-between items-center relative z-10">
-                    <div>
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-100 block">স্টক আউট / লো-স্টক</span>
-                      <h3 className="text-xl sm:text-2xl font-black mt-1">{outOfStockCount}</h3>
-                    </div>
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-white/20 rounded-xl flex items-center justify-center text-base sm:text-lg backdrop-blur-xs">
-                      ⚠️
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Recent Orders & Stock Alert */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-w-0">
-                <div className="lg:col-span-8 bg-white p-4 sm:p-5 rounded-2xl border border-stone-200 shadow-2xs space-y-4 min-w-0">
-                  <div className="flex items-center justify-between border-b pb-3">
-                    <h3 className="font-extrabold text-xs text-slate-900">সাম্প্রতিক অর্ডারসমূহ</h3>
-                    <button
-                      onClick={() => handleMainTabChange('ecommerce')}
-                      className="text-[10px] font-bold text-[#8A1538] hover:underline"
-                    >
-                      সব দেখুন ➔
-                    </button>
-                  </div>
-
-                  <div className="overflow-x-auto w-full">
-                    <table className="w-full text-left text-xs border-collapse min-w-[500px]">
-                      <thead>
-                        <tr className="bg-slate-50 text-slate-400 font-extrabold uppercase text-[10px] border-b">
-                          <th className="py-2.5 px-3">ORDER ID</th>
-                          <th className="py-2.5 px-3">CUSTOMER</th>
-                          <th className="py-2.5 px-3 text-right">AMOUNT</th>
-                          <th className="py-2.5 px-3 text-right">STATUS</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y text-slate-700 font-medium">
-                        {orders.length === 0 ? (
-                          <tr>
-                            <td colSpan={4} className="py-8 text-center text-stone-400 font-bold">
-                              এখনো কোনো অর্ডার পাওয়া যায়নি।
-                            </td>
-                          </tr>
-                        ) : (
-                          orders.slice(0, 5).map((ord: any) => (
-                            <tr key={ord.id || ord.order_id}>
-                              <td className="py-3 px-3 font-mono font-black text-[#8A1538]">
-                                #{ord.orderNumber || ord.id || ord.order_id}
-                              </td>
-                              <td className="py-3 px-3">
-                                <span className="font-bold block text-slate-900">
-                                  {ord.customerName || ord.customer_name || ord.shippingAddress?.fullName || 'Guest Customer'}
-                                </span>
-                                <span className="text-[10px] text-slate-400 font-mono">
-                                  {ord.customerPhone || ord.phone || ord.shippingAddress?.phone || ''}
-                                </span>
-                              </td>
-                              <td className="py-3 px-3 text-right font-mono font-bold">
-                                ৳{ord.total || ord.amount || ord.total_price || 0}
-                              </td>
-                              <td className="py-3 px-3 text-right">
-                                <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-50 text-amber-600 border border-amber-200 uppercase">
-                                  {ord.status || 'pending'}
-                                </span>
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-4 bg-white p-4 sm:p-5 rounded-2xl border border-stone-200 shadow-2xs space-y-3 min-w-0">
-                  <h3 className="font-extrabold text-xs text-rose-600 flex items-center gap-1.5 border-b pb-2">
-                    <span>⚠️</span>
-                    <span>লো-স্টক নোটিফিকেশন</span>
-                  </h3>
-
-                  {outOfStockCount === 0 ? (
-                    <div className="p-6 bg-emerald-50/50 border border-emerald-100 rounded-xl text-center space-y-1">
-                      <span className="text-2xl block">🎉</span>
-                      <p className="text-xs font-bold text-emerald-800">সব প্রোডাক্টের স্টক পর্যাপ্ত আছে!</p>
-                    </div>
-                  ) : (
-                    <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl text-xs space-y-2">
-                      <p className="font-bold text-rose-800">
-                        {outOfStockCount} টি প্রোডাক্টের স্টক শেষ হয়ে গেছে!
-                      </p>
-                      <button
-                        onClick={() => handleEcomSubTabChange('products')}
-                        className="text-[10px] font-bold text-[#8A1538] underline"
-                      >
-                        প্রোডাক্ট ক্যাটাগরি আপডেট করুন ➔
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div className="min-w-0">
+              <OverviewTab
+                domain={domain}
+                storeName={storeName || 'আমার অনলাইন শপ'}
+                planName={planName || 'Starter Plan'}
+                onNavigateTab={(tab) => handleMainTabChange(tab)}
+              />
             </div>
           )}
-
           {/* TAB 2: ECOMMERCE - PRODUCTS SUBTAB */}
           {activeTab === 'ecommerce' && activeEcomSubTab === 'products' && (
             <div className="space-y-4 min-w-0">
@@ -723,7 +608,8 @@ function InnerMerchantAdminSuite({
                 <ProductList
                   initialProducts={products}
                   categories={categories}
-                  onAddNew={() => handleProductSubSubTabChange('add')}
+                  onAddNew={handleAddNewProduct}
+                  onEditProduct={handleEditProduct}
                 />
               )}
 
@@ -732,7 +618,11 @@ function InnerMerchantAdminSuite({
                   categories={categories}
                   brands={brands}
                   domain={domain}
-                  onSuccess={() => handleProductSubSubTabChange('all')}
+                  initialData={editingProduct}
+                  onSuccess={() => {
+                    setEditingProduct(null);
+                    handleProductSubSubTabChange('all');
+                  }}
                 />
               )}
 
@@ -753,8 +643,15 @@ function InnerMerchantAdminSuite({
               )}
 
               {activeProductSubTab === 'coupon' && (
-                <CouponManager initialCoupons={coupons} />
+                <CouponManager initialCoupons={coupons} domain={domain} />
               )}
+            </div>
+          )}
+
+          {/* TAB 2: ECOMMERCE - SHIPPING SUBTAB */}
+          {activeTab === 'ecommerce' && activeEcomSubTab === 'shipping' && (
+            <div className="min-w-0">
+              <ShippingSettingsTab domain={domain} />
             </div>
           )}
 
@@ -782,41 +679,37 @@ function InnerMerchantAdminSuite({
 
           {/* TAB 3: MEDIA */}
           {activeTab === 'media' && (
-            <div className="bg-white p-6 rounded-2xl border space-y-3 min-w-0">
-              <h2 className="text-sm font-extrabold text-slate-900">🖼️ Cloudflare R2 Media Gallery</h2>
-              <p className="text-xs text-slate-500">Upload and manage product assets and marketing images.</p>
+            <div className="min-w-0">
+              <MediaManagerTab domain={domain} />
             </div>
           )}
 
+
           {/* TAB 4: PAGES */}
           {activeTab === 'pages' && (
-            <div className="bg-white p-6 rounded-2xl border space-y-3 min-w-0">
-              <h2 className="text-sm font-extrabold text-slate-900">📄 Custom Site Pages ({pages.length})</h2>
-              <p className="text-xs text-slate-500">Manage Terms, Privacy Policy, and About Us pages.</p>
+            <div className="min-w-0">
+              <PagesTab initialPages={pages} domain={domain} />
             </div>
           )}
 
           {/* TAB 5: ANALYTICS */}
           {activeTab === 'analytics' && (
-            <div className="bg-white p-6 rounded-2xl border space-y-3 min-w-0">
-              <h2 className="text-sm font-extrabold text-slate-900">📈 Sales & Conversion Analytics</h2>
-              <p className="text-xs text-slate-500">Monitor store GMV, traffic, and order conversion rates.</p>
+            <div className="min-w-0">
+              <AnalyticsTab domain={domain} orders={orders} products={products} />
             </div>
           )}
 
           {/* TAB 6: SITE BUILDER */}
           {activeTab === 'site-builder' && (
-            <div className="bg-white p-6 rounded-2xl border space-y-3 min-w-0">
-              <h2 className="text-sm font-extrabold text-slate-900">🚀 Puck Block Builder & Landing Pages</h2>
-              <p className="text-xs text-slate-500">Design custom storefront landing pages and theme blocks.</p>
+            <div className="min-w-0">
+              <SiteBuilderTab domain={domain} activeSubTab={activeSiteBuilderSubTab} />
             </div>
           )}
 
           {/* TAB 7: SETTINGS */}
           {activeTab === 'settings' && (
-            <div className="bg-white p-6 rounded-2xl border space-y-3 min-w-0">
-              <h2 className="text-sm font-extrabold text-slate-900">⚙️ Storefront Tracking & Pixels</h2>
-              <p className="text-xs text-slate-500">Configure Meta Pixel, Google Tag Manager (GTM), and API tokens.</p>
+            <div className="min-w-0">
+              <SettingsTab domain={domain} />
             </div>
           )}
         </div>
@@ -838,3 +731,4 @@ export default function MerchantAdminSuite(props: MerchantAdminSuiteProps) {
     </Suspense>
   );
 }
+

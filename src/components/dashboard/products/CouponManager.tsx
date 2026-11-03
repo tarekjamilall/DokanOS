@@ -20,8 +20,11 @@ export type Coupon = {
 type CouponManagerProps = {
   initialCoupons?: Coupon[];
   availableProducts?: { id: string; name: string }[];
+  domain?: string; // 👈 ১. প্রপ্সে domain যুক্ত করা হলো
   onCouponChange?: (coupons: Coupon[]) => void;
 };
+
+
 
 // Default Sample Products for Selector
 const DEFAULT_PRODUCTS = [
@@ -34,6 +37,7 @@ const DEFAULT_PRODUCTS = [
 export default function CouponManager({
   initialCoupons = [],
   availableProducts = DEFAULT_PRODUCTS,
+  domain = '', // 👈 ২. ডিফল্ট ডোমেইন স্টেট
   onCouponChange,
 }: CouponManagerProps) {
   // Coupon List State
@@ -145,8 +149,8 @@ export default function CouponManager({
     setEditingCoupon({ ...editingCoupon, applicableProducts: updated });
   };
 
-  // Add Coupon Handler
-  const handleAddCoupon = (e: React.FormEvent) => {
+  // ➕ Add Coupon Handler with Real API (Steps 116, 117 & 119)
+  const handleAddCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim()) {
       showToast('Please enter or generate a coupon code.', 'error');
@@ -157,11 +161,6 @@ export default function CouponManager({
       return;
     }
 
-    if (discountType === 'fixed_product' && applicableProducts.length === 0) {
-      showToast('Please select at least one applicable product for Fixed Product Discount.', 'error');
-      return;
-    }
-
     const formattedCode = code.trim().toUpperCase();
 
     if (coupons.some((c) => c.code === formattedCode)) {
@@ -169,50 +168,78 @@ export default function CouponManager({
       return;
     }
 
-    const newCoupon: Coupon = {
-      id: `coup-${Date.now()}`,
-      code: formattedCode,
-      discountType,
-      amount: Number(amount),
-      minSpend: minSpend !== '' ? Number(minSpend) : undefined,
-      applicableProducts: applicableProducts.length > 0 ? applicableProducts : undefined,
-      limitUsageToXItems: limitUsageToXItems !== '' ? Number(limitUsageToXItems) : undefined,
-      expiryDate: expiryDate || undefined,
-      usageLimit: usageLimit !== '' ? Number(usageLimit) : undefined,
-      usageCount: 0,
-      status: 'active',
-      description: description.trim(),
-    };
+    try {
+      const res = await fetch('/api/merchant/coupons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain, // 👈 এখন আর ReferenceError হবে না
+          code: formattedCode,
+          discountType: discountType === 'percent' ? 'percentage' : 'flat',
+          discountValue: Number(amount),
+          minOrderAmount: minSpend !== '' ? Number(minSpend) : 0,
+          expirationDate: expiryDate || undefined,
+        }),
+      });
 
-    const updated = [newCoupon, ...coupons];
-    setCoupons(updated);
-    if (onCouponChange) onCouponChange(updated);
+      const data = await res.json();
 
-    // Reset Form
-    setCode('');
-    setDiscountType('fixed_cart');
-    setAmount('');
-    setMinSpend('');
-    setApplicableProducts([]);
-    setLimitUsageToXItems('');
-    setExpiryDate('');
-    setUsageLimit('');
-    setDescription('');
-    showToast('🎉 New promotional coupon created successfully!', 'success');
+      if (res.ok && data.success) {
+        const savedCoupon: Coupon = {
+          id: data.coupon.id,
+          code: data.coupon.code,
+          discountType,
+          amount: Number(amount),
+          minSpend: minSpend !== '' ? Number(minSpend) : undefined,
+          expiryDate: expiryDate || undefined,
+          usageCount: 0,
+          status: 'active',
+          description: description.trim(),
+        };
+
+        const updated = [savedCoupon, ...coupons];
+        setCoupons(updated);
+        if (onCouponChange) onCouponChange(updated);
+
+        // Reset Form
+        setCode('');
+        setAmount('');
+        setMinSpend('');
+        setExpiryDate('');
+        setDescription('');
+        showToast('🎉 কুপন সফলভাবে ডাটাবেসে সেভ হয়েছে!', 'success');
+      } else {
+        showToast(data.error || 'কুপন সেভ করতে ব্যর্থ হয়েছে!', 'error');
+      }
+    } catch (err: any) {
+      showToast('⚠️ কুপন সেভ করতে সমস্যা হয়েছে! আবার চেষ্টা করুন।', 'error');
+    }
   };
 
-  // Confirm Delete Action
-  const confirmDeleteCoupon = () => {
+  // 🗑️ Confirm Delete Action with Real API
+  const confirmDeleteCoupon = async () => {
     if (!deleteModal.coupon) return;
 
     const targetId = deleteModal.coupon.id;
-    const updated = coupons.filter((c) => c.id !== targetId);
 
-    setCoupons(updated);
-    if (onCouponChange) onCouponChange(updated);
+    try {
+      const res = await fetch(`/api/merchant/coupons?id=${targetId}`, {
+        method: 'DELETE',
+      });
 
-    setDeleteModal({ show: false, coupon: null });
-    showToast('Coupon deleted successfully.', 'success');
+      if (res.ok) {
+        const updated = coupons.filter((c) => c.id !== targetId);
+        setCoupons(updated);
+        if (onCouponChange) onCouponChange(updated);
+        showToast('Coupon deleted from DB successfully.', 'success');
+      } else {
+        showToast('Failed to delete coupon.', 'error');
+      }
+    } catch (err) {
+      showToast('Network error!', 'error');
+    } finally {
+      setDeleteModal({ show: false, coupon: null });
+    }
   };
 
   // Save Edit Coupon

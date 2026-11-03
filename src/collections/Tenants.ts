@@ -1,10 +1,11 @@
 import type { CollectionConfig } from 'payload';
+import { createDefaultPages } from '../lib/tenant/createDefaultPages';
 
 export const Tenants: CollectionConfig = {
   slug: 'tenants',
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'slug', 'status', 'planSummary', 'merchantEmail', 'createdAt'],
+    defaultColumns: ['name', 'slug', 'customDomain', 'status', 'planSummary', 'merchantEmail', 'createdAt'],
     hidden: ({ user }: any) => user?.role !== 'super-admin',
   },
   access: {
@@ -61,6 +62,7 @@ export const Tenants: CollectionConfig = {
     ],
     afterChange: [
       async ({ doc, operation, req }) => {
+        // ১. অটো মার্চেন্ট ইউজার অ্যাকাউন্ট তৈরি
         if (operation === 'create' && doc.merchantEmail && doc.generatedPassword) {
           try {
             const existingUsers = await req.payload.find({
@@ -83,6 +85,21 @@ export const Tenants: CollectionConfig = {
             console.error('Error auto-creating merchant user:', error);
           }
         }
+
+        // ২. নতুন স্টোরের জন্য অটো ৫টি ডিফল্ট লিগ্যাল পেজ সিডিং
+        if (operation === 'create' && doc.id) {
+          try {
+            await createDefaultPages({
+              payload: req.payload,
+              tenantId: doc.id,
+              storeName: doc.name || 'আমাদের শপ',
+              supportPhone: doc.contactPhone || '01700000000',
+              supportEmail: doc.merchantEmail || 'support@example.com',
+            });
+          } catch (err) {
+            console.error('Error seeding default pages:', err);
+          }
+        }
       },
     ],
   },
@@ -97,10 +114,12 @@ export const Tenants: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Store Details',
+          label: 'Store Details & Custom Domain',
           fields: [
             { name: 'name', type: 'text', required: true, label: 'Store / Brand Name' },
             { name: 'slug', type: 'text', required: true, unique: true, label: 'Subdomain Slug' },
+            { name: 'customDomain', type: 'text', unique: true, index: true, label: 'Custom Domain (e.g. mybrand.com)' },
+            { name: 'domainVerified', type: 'checkbox', defaultValue: false, label: 'Custom Domain DNS Verified' },
             {
               type: 'row',
               fields: [
@@ -117,50 +136,34 @@ export const Tenants: CollectionConfig = {
           ],
         },
         {
-          label: 'Branding & Store Settings',
+          label: 'Branding, Pixels & Theme Settings',
           fields: [
-            {
-              name: 'brandLogo',
-              type: 'text',
-              label: 'Store Logo Image URL',
-              admin: { placeholder: 'https://example.com/logo.png' },
-            },
-            {
-              name: 'primaryColor',
-              type: 'select',
-              options: [
-                { label: 'Royal Indigo (Default)', value: '#4f46e5' },
-                { label: 'Emerald Green', value: '#059669' },
-                { label: 'Crimson Red', value: '#dc2626' },
-                { label: 'Classic Slate Black', value: '#0f172a' },
-                { label: 'Rose Pink', value: '#e11d48' },
-              ],
-              defaultValue: '#4f46e5',
-              label: 'Store Primary Theme Color',
-            },
-            {
-              name: 'announcementText',
-              type: 'text',
-              defaultValue: '🎉 ক্যাশ অন ডেলিভারি (COD) সুবিধা উপলব্ধ | ঢাকার ভেতরে শিপিং ৳৬০, বাইরে ৳১২০',
-              label: 'Top Announcement Bar Text',
-            },
-            {
-              type: 'row',
-              fields: [
-                {
-                  name: 'whatsappNumber',
-                  type: 'text',
-                  label: 'WhatsApp Live Chat Phone',
-                  admin: { placeholder: '8801712345678' },
-                },
-                {
-                  name: 'metaPixelId',
-                  type: 'text',
-                  label: 'Meta (Facebook) Pixel ID',
-                  admin: { placeholder: 'e.g. 123456789012345' },
-                },
-              ],
-            },
+            { name: 'brandLogo', type: 'text', label: 'Store Logo Image URL' },
+            { name: 'favicon', type: 'text', label: 'Store Favicon Image URL' },
+            { name: 'primaryColor', type: 'text', defaultValue: '#4f46e5', label: 'Store Primary Theme Color (Hex Code)' },
+            { name: 'showAnnouncement', type: 'checkbox', defaultValue: true, label: 'Show Announcement Bar' },
+            { name: 'announcementText', type: 'text', defaultValue: '🎉 ক্যাশ অন ডেলিভারি (COD) সুবিধা উপলব্ধ | সারা বাংলাদেশে দ্রুত ডেলিভারি', label: 'Announcement Text' },
+            { name: 'announcementBg', type: 'text', defaultValue: '#0f172a', label: 'Announcement Bar BG Color' },
+            { name: 'announcementTextColor', type: 'text', defaultValue: '#ffffff', label: 'Announcement Bar Text Color' },
+            { name: 'helplinePhone', type: 'text', label: 'Helpline / WhatsApp Phone' },
+            { name: 'whatsappNumber', type: 'text', label: 'WhatsApp Live Chat Phone' },
+            { name: 'stickyHeader', type: 'checkbox', defaultValue: true, label: 'Sticky Header Navbar' },
+            { name: 'footerAboutText', type: 'textarea', label: 'Footer Short About Text' },
+            { name: 'supportPhone', type: 'text', label: 'Support Phone' },
+            { name: 'supportEmail', type: 'email', label: 'Support Email' },
+            { name: 'address', type: 'text', label: 'Store Address' },
+            { name: 'copyrightText', type: 'text', label: 'Footer Copyright Text' },
+            { name: 'facebookUrl', type: 'text', label: 'Facebook Page URL' },
+            { name: 'instagramUrl', type: 'text', label: 'Instagram Profile URL' },
+            { name: 'youtubeUrl', type: 'text', label: 'YouTube Channel URL' },
+            { name: 'showTrustBadges', type: 'checkbox', defaultValue: true, label: 'Show Trust Badges' },
+            { name: 'customCss', type: 'textarea', label: 'Custom CSS Styles' },
+            { name: 'customScripts', type: 'textarea', label: 'Custom Header Scripts' },
+            { name: 'metaPixelId', type: 'text', label: 'Meta (Facebook) Pixel ID' },
+            { name: 'facebookCapiToken', type: 'text', label: 'Facebook Conversion API (CAPI) Token' },
+            { name: 'gtmContainerId', type: 'text', label: 'Google Tag Manager Container ID' },
+            { name: 'ga4MeasurementId', type: 'text', label: 'Google Analytics 4 Measurement ID' },
+            { name: 'apiTokens', type: 'json', label: 'API Secret Tokens' },
           ],
         },
         {

@@ -12,6 +12,7 @@ export async function POST(request: Request) {
       customerPhone,
       deliveryAddress,
       shippingZone,
+      shippingCharge,
       customerNote,
       couponCode,
       paymentMethod = 'cod',
@@ -20,7 +21,14 @@ export async function POST(request: Request) {
 
     if (!domain || !productId || !customerName || !customerPhone || !deliveryAddress) {
       return NextResponse.json(
-        { error: 'প্রয়োজনীয় তথ্যগুলো সঠিকভাবে পূরণ করুন।' },
+        { error: 'প্রয়োজনীয় তথ্যগুলো (নাম, ফোন, ঠিকানা) সঠিকভাবে পূরণ করুন।' },
+        { status: 400 }
+      );
+    }
+
+    if (!shippingZone) {
+      return NextResponse.json(
+        { error: 'অনুগ্রহ করে ডেলিভারি এলাকা (শিপিং জোন) সিলেক্ট করুন।' },
         { status: 400 }
       );
     }
@@ -40,7 +48,7 @@ export async function POST(request: Request) {
 
     const tenant = tenantQuery.docs[0];
 
-    // 2. Fetch Product
+    // 2. Fetch Product & Pre-check Stock
     const product = await payload.findByID({
       collection: 'products',
       id: productId,
@@ -48,12 +56,28 @@ export async function POST(request: Request) {
     });
 
     if (!product) {
-      return NextResponse.json({ error: 'প্রোডাক্টটি পাওয়া যায়নি' }, { status: 404 });
+      return NextResponse.json({ error: 'প্রোডাক্টটি ডাটাবেসে পাওয়া যায়নি' }, { status: 404 });
+    }
+
+    // ⚡ Stock Availability Check
+    if (product.inventory?.manageStock) {
+      const currentStock = product.inventory?.stockQuantity ?? 0;
+      if (currentStock < quantity) {
+        return NextResponse.json(
+          { error: `দুঃখিত, পর্যাপ্ত স্টক নেই! বর্তমান উপলব্ধ স্টক: ${currentStock} টি` },
+          { status: 400 }
+        );
+      }
     }
 
     const unitPrice = product.salePrice || product.price || 0;
     const subtotal = unitPrice * quantity;
-    const shippingCharge = shippingZone === 'inside-dhaka' ? 60 : 120;
+    const finalShippingCharge =
+      shippingCharge !== undefined && shippingCharge !== null
+        ? Number(shippingCharge)
+        : shippingZone === 'inside-dhaka'
+        ? 60
+        : 120;
 
     // 3. Coupon Validation
     let discountAmount = 0;
@@ -73,7 +97,6 @@ export async function POST(request: Request) {
       if (couponQuery.docs && couponQuery.docs.length > 0) {
         const coupon = couponQuery.docs[0];
 
-        // Check Expiry Date
         const now = new Date();
         const expiry = coupon.expirationDate ? new Date(coupon.expirationDate) : null;
 
@@ -81,7 +104,6 @@ export async function POST(request: Request) {
           return NextResponse.json({ error: 'কুপন কোডের মেয়াদ শেষ হয়ে গেছে!' }, { status: 400 });
         }
 
-        // Check Min Order Amount
         if (coupon.minOrderAmount && subtotal < coupon.minOrderAmount) {
           return NextResponse.json(
             { error: `এই কুপন ব্যবহার করতে সর্বনিম্ন ৳${coupon.minOrderAmount}-এর অর্ডার করতে হবে।` },
@@ -89,7 +111,6 @@ export async function POST(request: Request) {
           );
         }
 
-        // Calculate Discount
         if (coupon.discountType === 'percentage') {
           discountAmount = Math.round((subtotal * (coupon.discountValue || 0)) / 100);
         } else if (coupon.discountType === 'fixed') {
@@ -100,10 +121,10 @@ export async function POST(request: Request) {
       }
     }
 
-    const grandTotal = Math.max(0, subtotal + shippingCharge - discountAmount);
+    const grandTotal = Math.max(0, subtotal + finalShippingCharge - discountAmount);
     const orderNumber = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
 
-    // 4. Create Order Doc
+    // 4. Create Order Document
     await payload.create({
       collection: 'orders',
       data: {
@@ -113,7 +134,7 @@ export async function POST(request: Request) {
         customerPhone,
         deliveryAddress,
         shippingZone,
-        shippingCharge,
+        shippingCharge: finalShippingCharge,
         customerNote: customerNote || '',
         items: [
           {

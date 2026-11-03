@@ -22,10 +22,14 @@ export default async function TenantStorefrontPage({ params, searchParams }: Pro
   let categories: any[] = [];
 
   try {
+    // ⚡ OR Query: Match both Tenant Subdomain Slug AND Custom Domain
     const tenantQuery = await payload.find({
       collection: 'tenants',
       where: {
-        slug: { equals: domain },
+        or: [
+          { slug: { equals: domain } },
+          { customDomain: { equals: domain } },
+        ],
       },
     });
 
@@ -72,7 +76,7 @@ export default async function TenantStorefrontPage({ params, searchParams }: Pro
         primaryColor: tenant?.primaryColor || '#4f46e5',
         announcementText:
           tenant?.announcementText ||
-          '🎉 ক্যাশ অন ডেলিভারি (COD) সুবিধা উপলব্ধ | ঢাকার ভেতরে শিপিং ৳৬০, বাইরে ৳১২০',
+          '🎉 ক্যাশ অন ডেলিভারি (COD) সুবিধা উপলব্ধ | দ্রুত ডেলিভারি সার্ভিস',
         whatsappNumber: tenant?.whatsappNumber || '',
         metaPixelId: tenant?.metaPixelId || '',
       }}

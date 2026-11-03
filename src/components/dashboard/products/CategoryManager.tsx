@@ -14,6 +14,7 @@ type Category = {
 
 type CategoryManagerProps = {
   initialCategories?: Category[];
+  domain?: string; // 👈 domain যুক্ত করা হলো
   onCategoryChange?: (categories: Category[]) => void;
 };
 
@@ -58,39 +59,39 @@ export default function CategoryManager({
     initialCategories.length > 0
       ? initialCategories
       : [
-          {
-            id: 'cat-1',
-            name: 'Premium Cotton T-Shirts',
-            slug: 'premium-cotton-tshirts',
-            parentId: null,
-            description: '100% Combed Organic Cotton Luxury Wear',
-            count: 24,
-          },
-          {
-            id: 'cat-2',
-            name: 'Polarized Aviator Sunglasses',
-            slug: 'polarized-aviator-sunglasses',
-            parentId: null,
-            description: 'UV400 Protected Luxury Eyewear Collection',
-            count: 18,
-          },
-          {
-            id: 'cat-3',
-            name: 'Slim-Fit Graphic Tees',
-            slug: 'slim-fit-graphic-tees',
-            parentId: 'cat-1',
-            description: 'Designer Edition Breathable Urban Fashion',
-            count: 9,
-          },
-          {
-            id: 'cat-4',
-            name: 'Handcrafted Leather Belts',
-            slug: 'handcrafted-leather-belts',
-            parentId: null,
-            description: 'Full-Grain Italian Genuine Leather Accessories',
-            count: 12,
-          },
-        ]
+        {
+          id: 'cat-1',
+          name: 'Premium Cotton T-Shirts',
+          slug: 'premium-cotton-tshirts',
+          parentId: null,
+          description: '100% Combed Organic Cotton Luxury Wear',
+          count: 24,
+        },
+        {
+          id: 'cat-2',
+          name: 'Polarized Aviator Sunglasses',
+          slug: 'polarized-aviator-sunglasses',
+          parentId: null,
+          description: 'UV400 Protected Luxury Eyewear Collection',
+          count: 18,
+        },
+        {
+          id: 'cat-3',
+          name: 'Slim-Fit Graphic Tees',
+          slug: 'slim-fit-graphic-tees',
+          parentId: 'cat-1',
+          description: 'Designer Edition Breathable Urban Fashion',
+          count: 9,
+        },
+        {
+          id: 'cat-4',
+          name: 'Handcrafted Leather Belts',
+          slug: 'handcrafted-leather-belts',
+          parentId: null,
+          description: 'Full-Grain Italian Genuine Leather Accessories',
+          count: 12,
+        },
+      ]
   );
 
   // Form States for Adding Category
@@ -168,7 +169,8 @@ export default function CategoryManager({
   };
 
   // Add Category Handler
-  const handleAddCategory = (e: React.FormEvent) => {
+  // ➕ Add Category Handler with Real API Call (Step 96 & 97)
+  const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       showToast('Please enter a valid category name.', 'error');
@@ -176,36 +178,57 @@ export default function CategoryManager({
     }
 
     const finalSlug = slug.trim() || bnToEnSlug(name);
-    
-    // Check duplicate slug
+
     if (categories.some((c) => c.slug === finalSlug)) {
       showToast('A category with this unique slug already exists!', 'error');
       return;
     }
 
-    const newCat: Category = {
-      id: `cat-${Date.now()}`,
-      name: name.trim(),
-      slug: finalSlug,
-      parentId: parentId || null,
-      description: description.trim(),
-      image,
-      count: 0,
-    };
+    try {
+      const res = await fetch('/api/merchant/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain,
+          name: name.trim(),
+          slug: finalSlug,
+          parentId: parentId || null,
+          description: description.trim(),
+        }),
+      });
 
-    const updated = [newCat, ...categories];
-    setCategories(updated);
-    if (onCategoryChange) onCategoryChange(updated);
+      const data = await res.json();
 
-    // Reset Form
-    setName('');
-    setSlug('');
-    setIsCustomSlug(false);
-    setParentId('');
-    setDescription('');
-    setImage('');
-    showToast('✨ Premium category added successfully!', 'success');
+      if (res.ok && data.success) {
+        const savedCat: Category = {
+          id: data.category.id,
+          name: data.category.name,
+          slug: data.category.slug,
+          parentId: typeof data.category.parent === 'object' ? data.category.parent?.id : (data.category.parent || null),
+          description: data.category.description || '',
+          count: 0,
+        };
+
+        const updated = [savedCat, ...categories];
+        setCategories(updated);
+        if (onCategoryChange) onCategoryChange(updated);
+
+        // Reset Form
+        setName('');
+        setSlug('');
+        setIsCustomSlug(false);
+        setParentId('');
+        setDescription('');
+        setImage('');
+        showToast('✨ Premium category added successfully!', 'success');
+      } else {
+        showToast(data.error || 'Failed to create category.', 'error');
+      }
+    } catch (err) {
+      showToast('Network error! Please try again.', 'error');
+    }
   };
+
 
   // Trigger Delete Confirmation Modal
   const requestDeleteCategory = (cat: Category) => {
@@ -218,21 +241,33 @@ export default function CategoryManager({
   };
 
   // Confirm Delete Action (Subcategories automatically convert to top-level)
-  const confirmDeleteCategory = () => {
+  // 🗑️ Confirm Delete Action with Real API
+  const confirmDeleteCategory = async () => {
     if (!deleteModal.category) return;
 
     const targetId = deleteModal.category.id;
-    
-    // Delete target category and convert any of its sub-categories to top-level (parentId: null)
-    const updated = categories
-      .filter((c) => c.id !== targetId)
-      .map((c) => (c.parentId === targetId ? { ...c, parentId: null } : c));
 
-    setCategories(updated);
-    if (onCategoryChange) onCategoryChange(updated);
-    
-    setDeleteModal({ show: false, category: null, hasChildren: false });
-    showToast('Category deleted successfully.', 'success');
+    try {
+      const res = await fetch(`/api/merchant/categories?id=${targetId}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        const updated = categories
+          .filter((c) => c.id !== targetId)
+          .map((c) => (c.parentId === targetId ? { ...c, parentId: null } : c));
+
+        setCategories(updated);
+        if (onCategoryChange) onCategoryChange(updated);
+        showToast('Category deleted successfully.', 'success');
+      } else {
+        showToast('Failed to delete category.', 'error');
+      }
+    } catch (err) {
+      showToast('Network error!', 'error');
+    } finally {
+      setDeleteModal({ show: false, category: null, hasChildren: false });
+    }
   };
 
   // Save Quick Edit
@@ -288,18 +323,17 @@ export default function CategoryManager({
 
   return (
     <div className="space-y-6 font-sans text-[#3B3433] relative">
-      
+
       {/* Toast Notification */}
       {toast.show && (
         <div className="fixed bottom-6 right-6 z-50 animate-bounce">
           <div
-            className={`px-5 py-3.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-3 border text-white ${
-              toast.type === 'success'
-                ? 'bg-[#8A1538] border-[#8A1538]'
-                : toast.type === 'error'
+            className={`px-5 py-3.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-3 border text-white ${toast.type === 'success'
+              ? 'bg-[#8A1538] border-[#8A1538]'
+              : toast.type === 'error'
                 ? 'bg-rose-700 border-rose-600'
                 : 'bg-stone-800 border-stone-700'
-            }`}
+              }`}
           >
             <span>{toast.type === 'success' ? '✅' : toast.type === 'error' ? '⚠️' : 'ℹ️'}</span>
             <span>{toast.msg}</span>
@@ -328,7 +362,7 @@ export default function CategoryManager({
 
       {/* 2-Column Layout: Left (Add Category Form), Right (Indented Table) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
+
         {/* LEFT COLUMN: Add New Category Form (4 Cols) */}
         <div className="lg:col-span-4">
           <form
@@ -373,9 +407,8 @@ export default function CategoryManager({
                 onChange={(e) => setSlug(e.target.value)}
                 readOnly={!isCustomSlug}
                 placeholder="e.g. premium-cotton-tshirt"
-                className={`w-full px-3.5 py-2 text-xs font-mono border border-stone-300 rounded-xl focus:ring-2 focus:ring-[#8A1538] transition placeholder:text-stone-300 ${
-                  !isCustomSlug ? 'bg-stone-50 text-stone-500' : 'bg-white font-bold'
-                }`}
+                className={`w-full px-3.5 py-2 text-xs font-mono border border-stone-300 rounded-xl focus:ring-2 focus:ring-[#8A1538] transition placeholder:text-stone-300 ${!isCustomSlug ? 'bg-stone-50 text-stone-500' : 'bg-white font-bold'
+                  }`}
               />
             </div>
 
@@ -459,7 +492,7 @@ export default function CategoryManager({
 
         {/* RIGHT COLUMN: Indented Category Tree Directory (8 Cols) */}
         <div className="lg:col-span-8 space-y-4">
-          
+
           {/* Search Toolbar */}
           <div className="bg-white p-3.5 rounded-2xl border border-stone-200/80 shadow-2xs flex items-center justify-between gap-3">
             <div className="relative flex-1">
@@ -570,7 +603,7 @@ export default function CategoryManager({
       {deleteModal.show && deleteModal.category && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95 duration-150 relative">
-            
+
             {/* Top Close Cross Button */}
             <button
               type="button"

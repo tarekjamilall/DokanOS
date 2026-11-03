@@ -2,7 +2,18 @@ import { withPayload } from '@payloadcms/next/withPayload';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // প্রয়োজন অনুযায়ী কাস্টম কনফিগ এখানে রাখা যাবে
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.r2.cloudflarestorage.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.pub.r2.dev',
+      },
+    ],
+  },
 };
 
 export default withPayload(nextConfig);

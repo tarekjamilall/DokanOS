@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export type OrderItem = {
   id: string;
@@ -253,31 +253,66 @@ export default function OrderList({
     setTimeout(() => setToast({ show: false, msg: '', type: 'success' }), 3000);
   };
 
-  // Status Change Handler
-  const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
-    const updated = orders.map((ord) => (ord.id === orderId ? { ...ord, status: newStatus } : ord));
-    setOrders(updated);
-    if (onOrderChange) onOrderChange(updated);
-    showToast(`Order status updated to ${newStatus.toUpperCase()}`, 'success');
+  // 🔄 Sync Prop Changes
+  useEffect(() => {
+    if (initialOrders) {
+      setOrders(initialOrders);
+    }
+  }, [initialOrders]);
+
+  // 🔄 Status Change Handler with Real API
+  const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
+    try {
+      const res = await fetch(`/api/merchant/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.ok) {
+        const updated = orders.map((ord) => (ord.id === orderId ? { ...ord, status: newStatus } : ord));
+        setOrders(updated);
+        if (onOrderChange) onOrderChange(updated);
+        showToast(`🎉 Order status updated to ${newStatus.toUpperCase()}`, 'success');
+      } else {
+        showToast('⚠️ স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে!', 'error');
+      }
+    } catch (err) {
+      showToast('⚠️ নেটওয়ার্ক এরর!', 'error');
+    }
   };
 
-  // Save Merchant Note
-  const handleSaveNote = (e: React.FormEvent) => {
+  // 💬 Save Merchant Note with Real API
+  const handleSaveNote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!noteEditOrder) return;
 
-    const updated = orders.map((ord) =>
-      ord.id === noteEditOrder.id ? { ...ord, merchantNote: tempNoteText.trim() } : ord
-    );
-    setOrders(updated);
-    if (onOrderChange) onOrderChange(updated);
+    try {
+      const res = await fetch(`/api/merchant/orders/${noteEditOrder.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ merchantNote: tempNoteText.trim() }),
+      });
 
-    if (detailsOrder && detailsOrder.id === noteEditOrder.id) {
-      setDetailsOrder({ ...detailsOrder, merchantNote: tempNoteText.trim() });
+      if (res.ok) {
+        const updated = orders.map((ord) =>
+          ord.id === noteEditOrder.id ? { ...ord, merchantNote: tempNoteText.trim() } : ord
+        );
+        setOrders(updated);
+        if (onOrderChange) onOrderChange(updated);
+
+        if (detailsOrder && detailsOrder.id === noteEditOrder.id) {
+          setDetailsOrder({ ...detailsOrder, merchantNote: tempNoteText.trim() });
+        }
+
+        setNoteEditOrder(null);
+        showToast('🎉 মার্চেন্ট নোট ডাটাবেসে সেভ হয়েছে!', 'success');
+      } else {
+        showToast('⚠️ নোট সেভ করতে সমস্যা হয়েছে!', 'error');
+      }
+    } catch (err) {
+      showToast('⚠️ নেটওয়ার্ক এরর!', 'error');
     }
-
-    setNoteEditOrder(null);
-    showToast('Merchant note saved successfully!', 'success');
   };
 
   // Copy Customer Info for Courier / CRM

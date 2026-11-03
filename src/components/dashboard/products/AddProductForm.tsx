@@ -342,71 +342,72 @@ export default function AddProductForm({
     showToast('Video link removed.', 'info');
   };
 
-  // Submit Handler
-  const handleSubmit = (e: React.FormEvent) => {
+  // ➕ Submit Handler (Fixed API Integration)
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !price) {
-      showToast('Please fill in required fields (Title & Price).', 'error');
+      showToast('⚠️ অনুগ্রহ করে প্রোডাক্টের নাম ও বিক্রয় মূল্য পূরণ করুন।', 'error');
       return;
     }
 
-    const payload = {
-      id: initialData?.id || `prod-${Date.now()}`,
-      numericId: initialData?.numericId || Math.floor(100 + Math.random() * 900),
+    const autoSlug = slug ? slug : bnToEnSlug(title);
+
+    const payloadBody = {
+      domain,
       title,
-      name: title,
-      slug: slug || bnToEnSlug(title),
+      slug: autoSlug,
       shortDescription,
       description,
       productType,
-      type: productType,
-      price,
-      regularPrice: price,
-      salePrice,
-      saleStartDate,
-      saleEndDate,
+      price: Number(price),
+      regularPrice: Number(price), // 👈 এখানে regularPrice এর জায়গায় price হবে
+      salePrice: salePrice ? Number(salePrice) : undefined,
       externalUrl,
       buttonText,
       sku,
       manageStock,
-      stockQuantity,
+      stockQuantity: Number(stockQuantity) || 0,
       stockStatus,
       lowStockThreshold,
       weight,
       dimensions,
       digitalFileUrl,
-      selectedAttributes,
-      variationsList,
+      attributes: selectedAttributes,
       variations: variationsList,
-      upsellInput,
-      crosssellInput,
       purchaseNote,
-      menuOrder,
-      productImage,
-      featuredImage: productImage,
+      image: productImage,
       galleryImages,
-      videoUrls,
-      categories: category ? [category] : ['Uncategorized'],
       category,
       brand,
-      tagsInput,
       tags: tagsInput ? tagsInput.split(',').map((t) => t.trim()).filter(Boolean) : [],
       isFeatured,
-      featured: isFeatured,
-      status: initialData?.status || 'published',
-      createdAt: initialData?.createdAt || new Date().toISOString(),
     };
 
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/merchant/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadBody),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        showToast(
+          isEditMode ? '🎉 প্রোডাক্ট আপডেট সম্পন্ন হয়েছে!' : '🎉 প্রোডাক্ট সফলভাবে ডাটাবেসে সেভ হয়েছে!',
+          'success'
+        );
+        if (onSave) onSave(data.product);
+        if (onSuccess) onSuccess();
+      } else {
+        showToast(data.error || '⚠️ প্রোডাক্ট সেভ করতে ব্যর্থ হয়েছে!', 'error');
+      }
+    } catch (err: any) {
+      showToast('⚠️ নেটওয়ার্ক এরর! আবার চেষ্টা করুন।', 'error');
+    } finally {
       setLoading(false);
-      showToast(
-        isEditMode ? '🎉 Product updated successfully!' : '🎉 Product published successfully!',
-        'success'
-      );
-      if (onSave) onSave(payload);
-      if (onSuccess) onSuccess();
-    }, 600);
+    }
   };
 
   return (

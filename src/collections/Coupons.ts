@@ -51,6 +51,7 @@ export const Coupons: CollectionConfig = {
       name: 'code',
       type: 'text',
       required: true,
+      index: true,
       label: 'Coupon Code',
       admin: { placeholder: 'e.g. EID2026' },
     },

@@ -1,3 +1,4 @@
+// src/collections/Orders.ts
 import type { CollectionConfig } from 'payload';
 
 export const Orders: CollectionConfig = {
@@ -16,6 +17,57 @@ export const Orders: CollectionConfig = {
         return data;
       },
     ],
+    // ⚡ Step 15, 16, 17 & 20: স্টক অটো-রিডাকশন আফটার-চেঞ্জ হুক
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        // শুধুমাত্র নতুন অর্ডার তৈরির সময় স্টক কমবে
+        if (operation === 'create' && doc?.items && Array.isArray(doc.items)) {
+          const { payload } = req;
+
+          for (const item of doc.items) {
+            if (!item.product) continue;
+
+            const productId = typeof item.product === 'object' ? item.product.id : item.product;
+            const orderedQty = item.quantity || 1;
+
+            try {
+              // ১. প্রডাক্ট ডাটা ফেচ করা
+              const product = await payload.findByID({
+                collection: 'products',
+                id: productId,
+                overrideAccess: true,
+              });
+
+              if (!product) continue;
+
+              // ২. স্টক অটো ট্র্যাকিং চালু থাকলে পরিমাণ কমানো
+              if (product.inventory?.manageStock) {
+                const currentStock = product.inventory?.stockQuantity ?? 0;
+                const newStock = Math.max(0, currentStock - orderedQty);
+                const newStatus = newStock === 0 ? 'out_of_stock' : product.inventory?.stockStatus || 'in_stock';
+
+                // ৩. ডাটাবেসে নতুন স্টক আপডেট করা
+                await payload.update({
+                  collection: 'products',
+                  id: productId,
+                  data: {
+                    inventory: {
+                      ...product.inventory,
+                      stockQuantity: newStock,
+                      stockStatus: newStatus,
+                    },
+                  },
+                  overrideAccess: true,
+                });
+              }
+            } catch (err) {
+              console.error(`Error updating stock for product ${productId}:`, err);
+            }
+          }
+        }
+        return doc;
+      },
+    ],
   },
   fields: [
     {
@@ -23,6 +75,7 @@ export const Orders: CollectionConfig = {
       type: 'text',
       required: true,
       unique: true,
+      index: true, // 👈 Step 5: ইনডেক্সড
       label: 'Order ID / Number',
       admin: {
         readOnly: true,
@@ -33,7 +86,7 @@ export const Orders: CollectionConfig = {
       type: 'relationship',
       relationTo: 'tenants',
       required: true,
-      index: true,
+      index: true, // 👈 Step 5: ইনডেক্সড
       label: 'Merchant Store',
       admin: {
         position: 'sidebar',

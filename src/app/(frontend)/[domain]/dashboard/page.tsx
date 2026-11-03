@@ -43,11 +43,13 @@ export default async function MerchantDashboardPage({ params }: Props) {
       });
       orders = orderQuery.docs;
 
-      // 3. Fetch Products
+     // 3. Fetch Products (With depth: 2 for full category & media population)
       const productQuery = await payload.find({
         collection: 'products',
         where: { tenant: { equals: tenant.id } },
         limit: 100,
+        sort: '-createdAt',
+        depth: 2, // 👈 depth: 2 যুক্ত করা হলো
         overrideAccess: true,
       });
       products = productQuery.docs;
