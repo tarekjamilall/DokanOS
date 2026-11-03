@@ -8,6 +8,14 @@ type CreateDefaultPagesProps = {
   supportEmail?: string;
 };
 
+type DefaultPage = {
+  title: string;
+  slug: string;
+  isSystem: boolean;
+  status: 'published' | 'draft';
+  content: string;
+};
+
 export async function createDefaultPages({
   payload,
   tenantId,
@@ -15,7 +23,7 @@ export async function createDefaultPages({
   supportPhone = '01700000000',
   supportEmail = 'support@example.com',
 }: CreateDefaultPagesProps) {
-  const defaultPages = [
+  const defaultPages: DefaultPage[] = [
     {
       title: 'আমাদের কথা (About Us)',
       slug: 'about-us',
