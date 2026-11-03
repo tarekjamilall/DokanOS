@@ -221,7 +221,7 @@ export default function AddProductForm({
     setSelectedAttributes((prev) => {
       const current = prev[attrName] || [];
       const updated = current.includes(valueName)
-        ? current.filter((v) => v !== valueName)
+        ? current.filter((v: string) => v !== valueName)
         : [...current, valueName];
       return { ...prev, [attrName]: updated };
     });
@@ -237,7 +237,7 @@ export default function AddProductForm({
       return;
     }
 
-    const attrArrays = activeAttrs.map((key) => ({
+    const attrArrays = activeAttrs.map((key: string) => ({
       attrName: key,
       options: selectedAttributes[key],
     }));
@@ -268,7 +268,7 @@ export default function AddProductForm({
 
   const handleVariationChange = (id: string, field: string, val: any) => {
     setVariationsList((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, [field]: val } : item))
+      prev.map((item: any) => (item.id === id ? { ...item, [field]: val } : item))
     );
   };
 
@@ -294,7 +294,7 @@ export default function AddProductForm({
   const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      Array.from(files).forEach((file) => {
+      Array.from(files).forEach((file: File) => {
         const reader = new FileReader();
         reader.onload = () => {
           setGalleryImages((prev) => [...prev, reader.result as string]);
@@ -306,7 +306,7 @@ export default function AddProductForm({
   };
 
   const removeGalleryImage = (index: number) => {
-    setGalleryImages((prev) => prev.filter((_, idx) => idx !== index));
+    setGalleryImages((prev) => prev.filter((_: any, idx: number) => idx !== index));
     showToast('Gallery image removed.', 'info');
   };
 
@@ -338,7 +338,7 @@ export default function AddProductForm({
   };
 
   const handleRemoveVideoUrl = (index: number) => {
-    setVideoUrls((prev) => prev.filter((_, idx) => idx !== index));
+    setVideoUrls((prev) => prev.filter((_: any, idx: number) => idx !== index));
     showToast('Video link removed.', 'info');
   };
 
@@ -379,7 +379,7 @@ export default function AddProductForm({
       galleryImages,
       category,
       brand,
-      tags: tagsInput ? tagsInput.split(',').map((t) => t.trim()).filter(Boolean) : [],
+      tags: tagsInput ? tagsInput.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
       isFeatured,
     };
 
@@ -413,22 +413,22 @@ export default function AddProductForm({
   return (
     <div className="space-y-6 font-sans text-[#3B3433] relative pb-12">
       {/* Toast Notification */}
-      {toast.show && (
-        <div className="fixed bottom-6 right-6 z-50 animate-bounce">
-          <div
-            className={`px-5 py-3.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-3 border text-white ${
-              toast.type === 'success'
-                ? 'bg-[#8A1538] border-[#8A1538]'
-                : toast.type === 'error'
-                ? 'bg-rose-700 border-rose-600'
-                : 'bg-stone-800 border-stone-700'
-            }`}
-          >
-            <span>{toast.type === 'success' ? '✅' : toast.type === 'error' ? '⚠️' : 'ℹ️'}</span>
-            <span>{toast.msg}</span>
+      {
+        toast.show && (
+          <div className="fixed bottom-6 right-6 z-50 animate-bounce">
+            <div
+              className={`px-5 py-3.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-3 border text-white ${toast.type === 'success'
+                  ? 'bg-[#8A1538] border-[#8A1538]'
+                  : toast.type === 'error'
+                    ? 'bg-rose-700 border-rose-600'
+                    : 'bg-stone-800 border-stone-700'
+                }`}
+            >
+              <span>{toast.type === 'success' ? '✅' : toast.type === 'error' ? '⚠️' : 'ℹ️'}</span>
+              <span>{toast.msg}</span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Header Container */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-stone-200/80 shadow-2xs flex items-center justify-between gap-3">
@@ -519,9 +519,8 @@ export default function AddProductForm({
                 Short Description (Summary)
               </label>
               <span
-                className={`text-[10px] font-mono font-bold ${
-                  shortDescription.length > SHORT_DESC_LIMIT ? 'text-rose-600' : 'text-stone-400'
-                }`}
+                className={`text-[10px] font-mono font-bold ${shortDescription.length > SHORT_DESC_LIMIT ? 'text-rose-600' : 'text-stone-400'
+                  }`}
               >
                 {shortDescription.length} / {SHORT_DESC_LIMIT}
               </span>
@@ -543,9 +542,8 @@ export default function AddProductForm({
                 Full Product Description
               </label>
               <span
-                className={`text-[10px] font-mono font-bold ${
-                  description.length > FULL_DESC_LIMIT ? 'text-rose-600' : 'text-stone-400'
-                }`}
+                className={`text-[10px] font-mono font-bold ${description.length > FULL_DESC_LIMIT ? 'text-rose-600' : 'text-stone-400'
+                  }`}
               >
                 {description.length} / {FULL_DESC_LIMIT}
               </span>
@@ -595,16 +593,15 @@ export default function AddProductForm({
                     { id: 'variations', label: `Variations (${variationsList.length})`, icon: '🔀' },
                     { id: 'linked', label: 'Linked Products', icon: '🔗' },
                     { id: 'advanced', label: 'Advanced Settings', icon: '⚙️' },
-                  ].map((tab) => (
+                  ].map((tab: any) => (
                     <button
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveDataTab(tab.id as any)}
-                      className={`shrink-0 md:w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition ${
-                        activeDataTab === tab.id
+                      className={`shrink-0 md:w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition ${activeDataTab === tab.id
                           ? 'bg-white text-[#8A1538] shadow-2xs border border-stone-200'
                           : 'text-stone-600 hover:bg-stone-100'
-                      }`}
+                        }`}
                     >
                       <span>{tab.icon}</span>
                       <span className="whitespace-nowrap">{tab.label}</span>
@@ -660,6 +657,7 @@ export default function AddProductForm({
                         <label className="block font-bold text-stone-600 mb-1">Sale End Date</label>
                         <input
                           type="date"
+
                           value={saleEndDate}
                           onChange={(e) => setSaleEndDate(e.target.value)}
                           className="w-full px-3 py-2 border border-stone-300 rounded-xl"
@@ -745,6 +743,7 @@ export default function AddProductForm({
 
                     <div>
                       <label className="block font-bold text-stone-700 mb-1">Stock Status</label>
+
                       <select
                         value={stockStatus}
                         onChange={(e) => setStockStatus(e.target.value)}
@@ -821,28 +820,28 @@ export default function AddProductForm({
                     </div>
 
                     <div className="space-y-3">
-                      {GLOBAL_ATTRIBUTES.map((attr) => (
+                      {GLOBAL_ATTRIBUTES.map((attr: any) => (
                         <div key={attr.id} className="p-3 bg-stone-50 border border-stone-200 rounded-xl space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-stone-800 text-xs">{attr.name}</span>
-                            <span className="text-[10px] bg-stone-200 px-2 py-0.5 rounded font-bold uppercase">
+                            <span className="text-[10px] bg-stone-200 px-2 py-0.5 rounded font-bold upperca
+se">
                               {attr.type} Swatches
                             </span>
                           </div>
 
                           <div className="flex flex-wrap gap-2 pt-1">
-                            {attr.values.map((val) => {
+                            {attr.values.map((val: any) => {
                               const isSelected = (selectedAttributes[attr.name] || []).includes(val.name);
                               return (
                                 <button
                                   key={val.id}
                                   type="button"
                                   onClick={() => toggleAttributeValue(attr.name, val.name)}
-                                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition ${
-                                    isSelected
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition ${isSelected
                                       ? 'bg-[#8A1538] text-white border-[#8A1538] shadow-2xs'
                                       : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'
-                                  }`}
+                                    }`}
                                 >
                                   {val.code && (
                                     <span
@@ -874,7 +873,7 @@ export default function AddProductForm({
                       </p>
                     ) : (
                       <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
-                        {variationsList.map((item, idx) => (
+                        {variationsList.map((item: any, idx: number) => (
                           <div key={item.id} className="p-3 bg-stone-50 border border-stone-200 rounded-xl space-y-2">
                             <div className="flex items-center justify-between border-b border-stone-200 pb-2">
                               <span className="font-bold text-[#8A1538] font-mono text-xs">
@@ -895,7 +894,8 @@ export default function AddProductForm({
                                   type="number"
                                   value={item.price}
                                   onChange={(e) => handleVariationChange(item.id, 'price', e.target.value)}
-                                  className="w-full p-1.5 border rounded bg-white font-bold"
+                                  className="w-full p-1.
+5 border rounded bg-white font-bold"
                                 />
                               </div>
                               <div>
@@ -972,7 +972,8 @@ export default function AddProductForm({
                         Menu Order (Catalog Display Order)
                       </label>
                       <input
-                        type="number"
+                        type="nu
+mber"
                         value={menuOrder}
                         onChange={(e) => setMenuOrder(e.target.value)}
                         className="w-full px-3 py-2 border rounded-xl text-xs font-bold"
@@ -1052,7 +1053,7 @@ export default function AddProductForm({
 
             {galleryImages.length > 0 && (
               <div className="grid grid-cols-2 gap-2 pt-2">
-                {galleryImages.map((gUrl, gIdx) => (
+                {galleryImages.map((gUrl: string, gIdx: number) => (
                   <div
                     key={gIdx}
                     className="relative aspect-square bg-stone-100 rounded-xl overflow-hidden border border-stone-200 group"
@@ -1146,9 +1147,10 @@ export default function AddProductForm({
             {/* Added Video URLs List */}
             {videoUrls.length > 0 && (
               <div className="space-y-2 pt-1">
-                {videoUrls.map((vUrl, vIdx) => (
+                {videoUrls.map((vUrl: string, vIdx: number) => (
                   <div
                     key={vIdx}
+
                     className="p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs flex items-center justify-between gap-2 group hover:border-[#8A1538]/40 transition"
                   >
                     <div className="flex items-center gap-2 truncate min-w-0">

@@ -119,7 +119,7 @@ export const parseCSVToProducts = (csvText: string): Product[] => {
   const rawHeaders = parseCSVLine(lines[0]);
   const headerMap: Record<string, number> = {};
 
-  rawHeaders.forEach((h, idx) => {
+  rawHeaders.forEach((h: string, idx: number) => {
     const cleanKey = normalizeHeaderKey(h);
     headerMap[cleanKey] = idx;
   });
@@ -172,13 +172,13 @@ export const parseCSVToProducts = (csvText: string): Product[] => {
     const stockQty = Number(getVal(stockQtyIdx)) || 10;
 
     const rawCats = getVal(catIdx);
-    const categories = rawCats ? rawCats.split(/\||,/).map((c) => c.trim()).filter(Boolean) : ['Uncategorized'];
+    const categories = rawCats ? rawCats.split(/\||,/).map((c: string) => c.trim()).filter(Boolean) : ['Uncategorized'];
 
     const rawTags = getVal(tagIdx);
-    const tags = rawTags ? rawTags.split(/\||,/).map((t) => t.trim()).filter(Boolean) : [];
+    const tags = rawTags ? rawTags.split(/\||,/).map((t: string) => t.trim()).filter(Boolean) : [];
 
     const rawGallery = getVal(galleryIdx);
-    const galleryImages = rawGallery ? rawGallery.split('|').map((g) => g.trim()).filter(Boolean) : [];
+    const galleryImages = rawGallery ? rawGallery.split('|').map((g: string) => g.trim()).filter(Boolean) : [];
 
     parsedProducts.push({
       id: rawId || `prod-${numericId}`,
