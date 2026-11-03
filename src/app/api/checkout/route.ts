@@ -1,3 +1,4 @@
+// src/app/api/checkout/route.ts
 import { NextResponse } from 'next/server';
 import { getPayload } from 'payload';
 import configPromise from '@/payload.config';
@@ -70,8 +71,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // Safe Unit Price Resolution
-    const unitPrice = (product as any).salePrice || product.price || 0;
+    const unitPrice = product.salePrice || product.price || 0;
     const subtotal = unitPrice * quantity;
     const finalShippingCharge =
       shippingCharge !== undefined && shippingCharge !== null
@@ -125,7 +125,7 @@ export async function POST(request: Request) {
     const grandTotal = Math.max(0, subtotal + finalShippingCharge - discountAmount);
     const orderNumber = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
 
-    // 4. Create Order Document (paymentStatus matched with Orders.ts schema)
+    // 4. Create Order Document
     await payload.create({
       collection: 'orders',
       data: {
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
         grandTotal,
         paymentMethod,
         transactionId: transactionId || '',
-        paymentStatus: 'unpaid', // 👈 Strict Schema Match ('unpaid' | 'paid' | 'partially-paid')
+        paymentStatus: 'unpaid',
         orderStatus: 'pending',
       },
       overrideAccess: true,

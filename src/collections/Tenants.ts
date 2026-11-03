@@ -1,3 +1,4 @@
+// src/collections/Tenants.ts
 import type { CollectionConfig } from 'payload';
 import { createDefaultPages } from '../lib/tenant/createDefaultPages';
 
@@ -164,6 +165,7 @@ export const Tenants: CollectionConfig = {
             { name: 'gtmContainerId', type: 'text', label: 'Google Tag Manager Container ID' },
             { name: 'ga4MeasurementId', type: 'text', label: 'Google Analytics 4 Measurement ID' },
             { name: 'apiTokens', type: 'json', label: 'API Secret Tokens' },
+            { name: 'headerLinks', type: 'json', label: 'Header Navigation Links' },
           ],
         },
         {

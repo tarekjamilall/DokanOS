@@ -257,6 +257,21 @@ export const Orders: CollectionConfig = {
               type: 'row',
               fields: [
                 {
+                  name: 'transactionId',
+                  type: 'text',
+                  label: 'Payment TrxID / Transaction ID',
+                },
+                {
+                  name: 'merchantNote',
+                  type: 'textarea',
+                  label: 'Merchant Internal Note',
+                },
+              ],
+            },
+            {
+              type: 'row',
+              fields: [
+                {
                   name: 'courierName',
                   type: 'select',
                   options: [

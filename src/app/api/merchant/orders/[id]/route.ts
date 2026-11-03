@@ -1,3 +1,4 @@
+// src/app/api/merchant/orders/[id]/route.ts
 import { NextResponse } from 'next/server';
 import { getPayload } from 'payload';
 import configPromise from '@/payload.config';
@@ -5,7 +6,7 @@ import configPromise from '@/payload.config';
 // ✏️ PATCH: অর্ডার স্ট্যাটাস, মার্চেন্ট নোট এবং কুরিয়ার ট্র্যাকিং আপডেট
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> } // 👈 Promise Type Signature
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;

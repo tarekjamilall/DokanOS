@@ -1,3 +1,4 @@
+// src/collections/Pages.ts
 import type { CollectionConfig } from 'payload';
 
 const slugify = (text: string) =>
@@ -13,7 +14,7 @@ export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'status', 'isHomepage', 'isLandingPage', 'tenant', 'createdAt'],
+    defaultColumns: ['title', 'slug', 'isHomepage', 'isLandingPage', 'tenant', 'createdAt'],
   },
   access: {
     read: ({ req: { user } }) => {
@@ -63,7 +64,7 @@ export const Pages: CollectionConfig = {
       type: 'text',
       required: true,
       label: 'Page Title',
-      admin: { placeholder: 'e.g. About Us or Eid Special Offer' },
+      admin: { placeholder: 'e.g. Eid Special Landing Page' },
     },
     {
       name: 'slug',
@@ -71,35 +72,28 @@ export const Pages: CollectionConfig = {
       required: true,
       index: true,
       label: 'Page URL Slug',
-      admin: { placeholder: 'e.g. about-us or home' },
+      admin: { placeholder: 'e.g. eid-offer or home' },
     },
     {
       name: 'content',
       type: 'textarea',
-      label: 'Page Rich HTML / Text Content (Used for System Pages)',
+      label: 'Page Content (HTML/Text)',
     },
     {
-      type: 'row',
-      fields: [
-        {
-          name: 'status',
-          type: 'select',
-          options: [
-            { label: 'Published', value: 'published' },
-            { label: 'Draft', value: 'draft' },
-          ],
-          defaultValue: 'published',
-          required: true,
-          admin: { width: '50%' },
-        },
-        {
-          name: 'isSystem',
-          type: 'checkbox',
-          defaultValue: false,
-          label: 'Is Default Legal System Page?',
-          admin: { width: '50%' },
-        },
+      name: 'status',
+      type: 'select',
+      options: [
+        { label: 'Published', value: 'published' },
+        { label: 'Draft', value: 'draft' },
       ],
+      defaultValue: 'published',
+      label: 'Publication Status',
+    },
+    {
+      name: 'isSystem',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'System Page',
     },
     {
       type: 'row',
@@ -134,6 +128,7 @@ export const Pages: CollectionConfig = {
       type: 'blocks',
       label: 'Page Layout Blocks (Shopify / Elementor Style Builder)',
       blocks: [
+        // 1. Hero Banner Block
         {
           slug: 'heroBanner',
           labels: { singular: 'Hero Banner', plural: 'Hero Banners' },
@@ -145,49 +140,75 @@ export const Pages: CollectionConfig = {
             { name: 'buttonText', type: 'text', defaultValue: 'অর্ডার করতে ক্লিক করুন', label: 'CTA Button Text' },
           ],
         },
+        // 2. Dynamic Product Grid Block
+        {
+          slug: 'productGrid',
+          labels: { singular: 'Product Grid Catalog', plural: 'Product Grids' },
+          fields: [
+            { name: 'title', type: 'text', defaultValue: 'আমাদের জনপ্রিয় প্রোডাক্টসমূহ', label: 'Section Title' },
+            { name: 'category', type: 'relationship', relationTo: 'categories', label: 'Filter by Category (Optional)' },
+            { name: 'limit', type: 'number', defaultValue: 8, label: 'Max Products to Display' },
+          ],
+        },
+        // 3. Product Spotlight (1-Click Cash on Delivery Buy Block)
+        {
+          slug: 'productSpotlight',
+          labels: { singular: 'Single Product Spotlight (Quick Sale)', plural: 'Product Spotlights' },
+          fields: [
+            { name: 'product', type: 'relationship', relationTo: 'products', required: true, label: 'Select Featured Product' },
+            { name: 'headline', type: 'text', label: 'Custom Offer Headline' },
+            { name: 'fomoText', type: 'text', defaultValue: '🔥 স্টক সীমিত! প্রডাক্ট হাতে পেয়ে টাকা পরিশোধ করুন', label: 'FOMO / Guarantee Message' },
+          ],
+        },
+        // 4. Trust Badges & Feature Grid Block
         {
           slug: 'featureGrid',
-          labels: { singular: 'Feature Grid', plural: 'Feature Grids' },
+          labels: { singular: 'Trust & Feature Grid (Badges)', plural: 'Feature Grids' },
           fields: [
-            { name: 'title', type: 'text', label: 'Section Title' },
+            { name: 'title', type: 'text', defaultValue: 'কেন আমাদের থেকে কেনাকাটা করবেন?', label: 'Section Title' },
             {
               name: 'features',
               type: 'array',
+              label: 'Feature Items',
               fields: [
-                { name: 'icon', type: 'text', label: 'Emoji / Icon' },
-                { name: 'title', type: 'text', label: 'Feature Title' },
-                { name: 'description', type: 'text', label: 'Feature Description' },
+                { name: 'icon', type: 'text', defaultValue: '🚚', label: 'Emoji / Icon' },
+                { name: 'title', type: 'text', required: true, label: 'Title' },
+                { name: 'description', type: 'text', label: 'Short Description' },
               ],
             },
           ],
         },
+        // 5. Customer Testimonials Block
         {
           slug: 'testimonials',
-          labels: { singular: 'Customer Reviews', plural: 'Customer Reviews' },
+          labels: { singular: 'Customer Testimonials', plural: 'Testimonial Blocks' },
           fields: [
-            { name: 'title', type: 'text', label: 'Section Title' },
+            { name: 'title', type: 'text', defaultValue: 'কাস্টমারদের ভালোবাসা ও মতামত', label: 'Section Title' },
             {
               name: 'reviews',
               type: 'array',
+              label: 'Customer Reviews',
               fields: [
-                { name: 'customerName', type: 'text', label: 'Customer Name' },
-                { name: 'rating', type: 'number', defaultValue: 5, label: 'Rating (1-5)' },
-                { name: 'comment', type: 'textarea', label: 'Review Comment' },
+                { name: 'customerName', type: 'text', required: true, label: 'Customer Name' },
+                { name: 'comment', type: 'textarea', required: true, label: 'Review Comment' },
+                { name: 'rating', type: 'number', defaultValue: 5, label: 'Star Rating (1-5)' },
               ],
             },
           ],
         },
+        // 6. FAQ Accordion Block
         {
           slug: 'faqAccordion',
           labels: { singular: 'FAQ Accordion', plural: 'FAQ Accordions' },
           fields: [
-            { name: 'title', type: 'text', label: 'Section Title' },
+            { name: 'title', type: 'text', defaultValue: 'সাধারণ কিছু প্রশ্ন ও উত্তর (FAQ)', label: 'Section Title' },
             {
               name: 'faqs',
               type: 'array',
+              label: 'FAQ Items',
               fields: [
-                { name: 'question', type: 'text', label: 'Question' },
-                { name: 'answer', type: 'textarea', label: 'Answer' },
+                { name: 'question', type: 'text', required: true, label: 'Question' },
+                { name: 'answer', type: 'textarea', required: true, label: 'Answer' },
               ],
             },
           ],

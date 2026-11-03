@@ -97,6 +97,33 @@ export const Products: CollectionConfig = {
       label: 'রেগুলার/পূর্বের মূল্য (৳)',
     },
     {
+      name: 'salePrice',
+      type: 'number',
+      min: 0,
+      label: 'অফার/সেল মূল্য (৳)',
+    },
+    {
+      name: 'category',
+      type: 'relationship',
+      relationTo: 'categories',
+      label: 'ক্যাটাগরি',
+    },
+    {
+      name: 'brand',
+      type: 'text',
+      label: 'ব্র্যান্ড নাম',
+    },
+    {
+      name: 'digitalFileUrl',
+      type: 'text',
+      label: 'ডিজিটাল ফাইল লিংক',
+    },
+    {
+      name: 'externalUrl',
+      type: 'text',
+      label: 'এক্সটার্নাল প্রোডাক্ট লিংক',
+    },
+    {
       name: 'images',
       type: 'array',
       required: true,
