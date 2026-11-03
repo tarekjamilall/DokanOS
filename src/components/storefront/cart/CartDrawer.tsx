@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useCartStore } from '@/store/useCartStore';
+import { useCartStore, CartItem } from '@/store/useCartStore';
 
 type CartDrawerProps = {
   domain: string;
@@ -63,7 +63,7 @@ export default function CartDrawer({ domain }: CartDrawerProps) {
                 </p>
               </div>
             ) : (
-              cart.map((item) => (
+              cart.map((item: CartItem) => (
                 <div key={item.id} className="pt-3 first:pt-0 flex gap-3 items-center">
                   {/* Thumbnail */}
                   {item.image ? (
@@ -88,6 +88,7 @@ export default function CartDrawer({ domain }: CartDrawerProps) {
                         ভ্যারিয়েন্ট: {item.selectedVariant}
                       </span>
                     )}
+
                     <div className="flex items-center justify-between pt-1">
                       {/* Quantity Controls */}
                       <div className="flex items-center border border-stone-300 rounded-lg overflow-hidden bg-white text-xs font-bold">
