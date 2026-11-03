@@ -5,7 +5,7 @@ import configPromise from '@/payload.config';
 // ✏️ 1. PATCH: কুইক এডিট (টাইটেল, দাম, স্টক আপডেট)
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> } // 👈 Promise টাইপ
+  { params }: { params: Promise<{ id: string }> } // 👈 Promise Type Signature
 ) {
   try {
     const { id } = await params;
@@ -50,7 +50,7 @@ export async function PATCH(
 // 🗑️ 2. DELETE: প্রোডাক্ট স্থায়ীভাবে ডিলিট করা
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> } // 👈 Promise টাইপ
+  { params }: { params: Promise<{ id: string }> } // 👈 Promise Type Signature
 ) {
   try {
     const { id } = await params;

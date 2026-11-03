@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // ⚡ Type assertion added for salePrice
+    // Safe Unit Price Resolution
     const unitPrice = (product as any).salePrice || product.price || 0;
     const subtotal = unitPrice * quantity;
     const finalShippingCharge =
@@ -125,7 +125,7 @@ export async function POST(request: Request) {
     const grandTotal = Math.max(0, subtotal + finalShippingCharge - discountAmount);
     const orderNumber = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
 
-    // 4. Create Order Document
+    // 4. Create Order Document (paymentStatus matched with Orders.ts schema)
     await payload.create({
       collection: 'orders',
       data: {
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
         grandTotal,
         paymentMethod,
         transactionId: transactionId || '',
-        paymentStatus: paymentMethod === 'cod' ? 'unpaid' : 'pending_verification',
+        paymentStatus: 'unpaid', // 👈 Strict Schema Match ('unpaid' | 'paid' | 'partially-paid')
         orderStatus: 'pending',
       },
       overrideAccess: true,
