@@ -52,6 +52,7 @@ function bnToEnSlug(text: string): string {
 
 export default function CategoryManager({
   initialCategories = [],
+  domain = '',
   onCategoryChange,
 }: CategoryManagerProps) {
   // Category List State
@@ -253,6 +254,7 @@ export default function CategoryManager({
       });
 
       if (res.ok) {
+
         const updated = categories
           .filter((c) => c.id !== targetId)
           .map((c) => (c.parentId === targetId ? { ...c, parentId: null } : c));
@@ -445,6 +447,7 @@ export default function CategoryManager({
               ></textarea>
             </div>
 
+
             {/* Thumbnail Image */}
             <div>
               <label className="block text-xs font-bold text-stone-700 mb-1">
@@ -528,7 +531,8 @@ export default function CategoryManager({
                       </td>
                     </tr>
                   ) : (
-                    hierarchicalList.map(({ category: cat, level }) => {
+                    hierarchicalList.map(({ category: cat,
+                      level }) => {
                       return (
                         <tr key={cat.id} className="hover:bg-stone-50/80 transition">
                           <td className="p-3 text-center">
