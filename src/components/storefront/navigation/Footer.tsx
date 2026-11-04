@@ -1,140 +1,206 @@
-// 'use client';
+'use client';
 
-// import React from 'react';
-// import Link from 'next/link';
-// import {
-//   Phone,
-//   Mail,
-//   MapPin,
-//   ShieldCheck,
-//   Truck,
-//   RotateCcw,
-//   Headphones,
-// } from 'lucide-react';
+import React from 'react';
+import Link from 'next/link';
 
-// export default function Footer() {
-//   return (
-//     <footer className="bg-stone-900 text-stone-300 pt-12 pb-8 border-t border-stone-800">
-//       <div className="max-w-7xl mx-auto px-4 space-y-10">
+type FooterProps = {
+  domain?: string;
+  storeName?: string;
+  brandLogo?: string;
+  primaryColor?: string;
+  footerAboutText?: string;
+  supportPhone?: string;
+  supportEmail?: string;
+  address?: string;
+  copyrightText?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
+  showTrustBadges?: boolean;
+};
+
+export default function Footer({
+  domain = '',
+  storeName = 'DokanStore',
+  brandLogo = '',
+  primaryColor = '#8A1538',
+  footerAboutText = 'আমরা প্রিমিয়াম মানের সেরা পণ্য এবং দ্রুততম কাস্টমার ডেলিভারি নিশ্চিত করতে প্রতিশ্রুতিবদ্ধ।',
+  supportPhone = '01700000000',
+  supportEmail = 'support@example.com',
+  address = 'ঢাকা, বাংলাদেশ',
+  copyrightText = '© 2026 All Rights Reserved.',
+  facebookUrl = '',
+  instagramUrl = '',
+  youtubeUrl = '',
+  showTrustBadges = true,
+}: FooterProps) {
+  return (
+    <footer className="bg-stone-900 text-stone-300 pt-12 pb-8 border-t border-stone-800 font-sans">
+      <div className="max-w-7xl mx-auto px-4 space-y-10">
         
-//         {/* 🛡️ ১. ট্রাস্ট ও সার্ভিস ফিচার ব্যাজ (৪-কলাম) */}
-//         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-8 border-b border-stone-800">
-//           <div className="flex items-center gap-3">
-//             <Truck className="w-7 h-7 text-[#8A1538] shrink-0" />
-//             <div>
-//               <h4 className="text-xs font-bold text-white">দ্রুত ডেলিভারি</h4>
-//               <p className="text-[11px] text-stone-400">সারা দেশে ২-৩ দিনে</p>
-//             </div>
-//           </div>
+        {/* 🛡️ 1. Trust & Service Feature Badges */}
+        {showTrustBadges && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-8 border-b border-stone-800 text-xs">
+            <div className="flex items-center gap-3 bg-stone-950/60 p-3.5 rounded-2xl border border-stone-800">
+              <span className="text-2xl">🚚</span>
+              <div>
+                <h4 className="font-extrabold text-white">দ্রুত ডেলিভারি</h4>
+                <p className="text-[11px] text-stone-400">সারা দেশে ক্যাশ অন ডেলিভারি</p>
+              </div>
+            </div>
 
-//           <div className="flex items-center gap-3">
-//             <ShieldCheck className="w-7 h-7 text-[#8A1538] shrink-0" />
-//             <div>
-//               <h4 className="text-xs font-bold text-white">১০০% অরিজিনাল</h4>
-//               <p className="text-[11px] text-stone-400">গুণগতমানের নিশ্চয়তা</p>
-//             </div>
-//           </div>
+            <div className="flex items-center gap-3 bg-stone-950/60 p-3.5 rounded-2xl border border-stone-800">
+              <span className="text-2xl">🛡️</span>
+              <div>
+                <h4 className="font-extrabold text-white">১০০% অরিজিনাল</h4>
+                <p className="text-[11px] text-stone-400">সর্বোচ্চ গুণগত মানের নিশ্চয়তা</p>
+              </div>
+            </div>
 
-//           <div className="flex items-center gap-3">
-//             <RotateCcw className="w-7 h-7 text-[#8A1538] shrink-0" />
-//             <div>
-//               <h4 className="text-xs font-bold text-white">সহজ রিটার্ন</h4>
-//               <p className="text-[11px] text-stone-400">৭ দিনের রিটার্ন নীতি</p>
-//             </div>
-//           </div>
+            <div className="flex items-center gap-3 bg-stone-950/60 p-3.5 rounded-2xl border border-stone-800">
+              <span className="text-2xl">🔄</span>
+              <div>
+                <h4 className="font-extrabold text-white">সহজ রিটার্ন পলিসি</h4>
+                <p className="text-[11px] text-stone-400">৭ দিনের রিটার্ন ও রিফান্ড সুবিধা</p>
+              </div>
+            </div>
 
-//           <div className="flex items-center gap-3">
-//             <Headphones className="w-7 h-7 text-[#8A1538] shrink-0" />
-//             <div>
-//               <h4 className="text-xs font-bold text-white">২৪/৭ সাপোর্ট</h4>
-//               <p className="text-[11px] text-stone-400">অনলাইন কাস্টমার কেয়ার</p>
-//             </div>
-//           </div>
-//         </div>
+            <div className="flex items-center gap-3 bg-stone-950/60 p-3.5 rounded-2xl border border-stone-800">
+              <span className="text-2xl">🎧</span>
+              <div>
+                <h4 className="font-extrabold text-white">২৪/৭ সাপোর্ট কেয়ার</h4>
+                <p className="text-[11px] text-stone-400">অনলাইন দ্রুত কাস্টমার সার্ভিস</p>
+              </div>
+            </div>
+          </div>
+        )}
 
-//         {/* 📋 ২. মূল ফুটার কন্টেন্ট (৪-কলাম) */}
-//         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 text-xs">
+        {/* 📋 2. Main Footer Widgets (4 Columns) */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 text-xs">
           
-//           {/* ব্র্যান্ড ইনফো (৫ কলাম) */}
-//           <div className="md:col-span-5 space-y-4">
-//             <Link href="/" className="flex items-center gap-2">
-//               <div className="w-8 h-8 bg-[#8A1538] text-white rounded-xl flex items-center justify-center font-black text-base">
-//                 ই
-//               </div>
-//               <span className="text-lg font-black text-white">
-//                 ই-কমার্স<span className="text-[#8A1538]">শপ</span>
-//               </span>
-//             </Link>
-//             <p className="text-stone-400 leading-relaxed max-w-sm">
-//               আমরা আপনাকে দিচ্ছি সবচেয়ে সেরা দামে ১০০% অরিজিনাল এবং কোয়ালিটিসম্পন্ন প্রিমিয়াম প্রডাক্টের নিশ্চয়তা। যেকোনো প্রয়োজনে কল করুন আমাদের হটলাইনে।
-//             </p>
-//           </div>
+          {/* Brand Info (5 Columns) */}
+          <div className="md:col-span-5 space-y-4">
+            <Link href={`/${domain}`} className="flex items-center gap-2">
+              {brandLogo ? (
+                <img src={brandLogo} alt={storeName} className="h-8 w-auto object-contain rounded" />
+              ) : (
+                <div
+                  style={{ backgroundColor: primaryColor }}
+                  className="w-8 h-8 text-white rounded-xl flex items-center justify-center font-black text-base shadow-sm"
+                >
+                  {storeName.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <span className="text-lg font-black text-white tracking-tight">{storeName}</span>
+            </Link>
 
-//           {/* ইম্পর্টেন্ট লিংক (৩ কলাম) */}
-//           <div className="md:col-span-3 space-y-3">
-//             <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-//               প্রয়োজনীয় লিংক
-//             </h3>
-//             <ul className="space-y-2 text-stone-400">
-//               <li>
-//                 <Link href="/shop" className="hover:text-white transition-colors">
-//                   সকল প্রডাক্ট (Shop)
-//                 </Link>
-//               </li>
-//               <li>
-//                 <Link href="/checkout" className="hover:text-white transition-colors">
-//                   কার্ট ও চেকআউট
-//                 </Link>
-//               </li>
-//               <li>
-//                 <a href="#about" className="hover:text-white transition-colors">
-//                   আমাদের সম্পর্কে
-//                 </a>
-//               </li>
-//             </ul>
-//           </div>
+            <p className="text-stone-400 leading-relaxed max-w-sm">{footerAboutText}</p>
 
-//           {/* যোগাযোগ ও হটলাইন (৪ কলাম) */}
-//           <div className="md:col-span-4 space-y-3">
-//             <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-//               যোগাযোগ
-//             </h3>
-//             <ul className="space-y-2.5 text-stone-400">
-//               <li className="flex items-center gap-2">
-//                 <Phone className="w-4 h-4 text-[#8A1538]" />
-//                 <span>+৮৮০ ১৭০০০০০-০০০</span>
-//               </li>
-//               <li className="flex items-center gap-2">
-//                 <Mail className="w-4 h-4 text-[#8A1538]" />
-//                 <span>support@ecommerceshop.com</span>
-//               </li>
-//               <li className="flex items-start gap-2">
-//                 <MapPin className="w-4 h-4 text-[#8A1538] shrink-0 mt-0.5" />
-//                 <span>মিরপুর ১০, ঢাকা, বাংলাদেশ</span>
-//               </li>
-//             </ul>
-//           </div>
+            {/* Social Links */}
+            <div className="flex items-center gap-3 pt-1">
+              {facebookUrl && (
+                <a
+                  href={facebookUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-white flex items-center justify-center transition"
+                >
+                  📘
+                </a>
+              )}
+              {instagramUrl && (
+                <a
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-white flex items-center justify-center transition"
+                >
+                  📷
+                </a>
+              )}
+              {youtubeUrl && (
+                <a
+                  href={youtubeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-white flex items-center justify-center transition"
+                >
+                  ▶️
+                </a>
+              )}
+            </div>
+          </div>
 
-//         </div>
+          {/* Quick Links (3 Columns) */}
+          <div className="md:col-span-3 space-y-3">
+            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">প্রয়োজনীয় পেজসমূহ</h3>
+            <ul className="space-y-2 text-stone-400 font-semibold">
+              <li>
+                <Link href={`/${domain}/about-us`} className="hover:text-white transition">
+                  আমাদের কথা (About Us)
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${domain}/privacy-policy`} className="hover:text-white transition">
+                  প্রাইভেসি পলিসি (Privacy Policy)
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${domain}/terms-and-conditions`} className="hover:text-white transition">
+                  সেবার শর্তাবলী (Terms & Conditions)
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${domain}/return-refund-policy`} className="hover:text-white transition">
+                  রিটার্ন ও রিফান্ড নীতি
+                </Link>
+              </li>
+            </ul>
+          </div>
 
-//         {/* 💳 ৩. কপিরাইট ও পেমেন্ট পার্টনারস */}
-//         <div className="pt-6 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-stone-500">
-//           <p>© {new Date().getFullYear()} ই-কমার্স শপ। সর্বস্বত্ব সংরক্ষিত।</p>
-//           <div className="flex items-center gap-3 font-bold text-stone-400">
-//             <span>পেমেন্ট পার্টনারস:</span>
-//             <span className="bg-stone-800 px-2 py-0.5 rounded border border-stone-700 text-rose-400">
-//               bKash
-//             </span>
-//             <span className="bg-stone-800 px-2 py-0.5 rounded border border-stone-700 text-orange-400">
-//               Nagad
-//             </span>
-//             <span className="bg-stone-800 px-2 py-0.5 rounded border border-stone-700 text-emerald-400">
-//               COD
-//             </span>
-//           </div>
-//         </div>
+          {/* Contact Details (4 Columns) */}
+          <div className="md:col-span-4 space-y-3">
+            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">যোগাযোগের ঠিকানা</h3>
+            <ul className="space-y-2.5 text-stone-400 font-medium">
+              <li className="flex items-center gap-2">
+                <span>📞</span>
+                <a href={`tel:${supportPhone}`} className="hover:text-white font-mono">
+                  {supportPhone}
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <span>✉️</span>
+                <a href={`mailto:${supportEmail}`} className="hover:text-white font-mono">
+                  {supportEmail}
+                </a>
+              </li>
+              <li className="flex items-start gap-2">
+                <span>📍</span>
+                <span>{address}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
 
-//       </div>
-//     </footer>
-//   );
-// }
+        {/* 💳 3. Copyright & Payment Gateway Icons */}
+        <div className="pt-6 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-stone-500 font-medium">
+          <p>{copyrightText || `© 2026 ${storeName}. All Rights Reserved.`}</p>
+
+          <div className="flex items-center gap-2 font-bold text-stone-400">
+            <span>নিরাপদ পেমেন্ট:</span>
+            <span className="bg-stone-800 px-2 py-0.5 rounded border border-stone-700 text-rose-400 font-mono">
+              bKash
+            </span>
+            <span className="bg-stone-800 px-2 py-0.5 rounded border border-stone-700 text-orange-400 font-mono">
+              Nagad
+            </span>
+            <span className="bg-stone-800 px-2 py-0.5 rounded border border-stone-700 text-emerald-400 font-mono">
+              COD
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </footer>
+  );
+}
