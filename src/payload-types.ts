@@ -1,5 +1,3 @@
-
-
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -292,6 +290,23 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  /**
+   * Leave empty for top-level category.
+   */
+  parent?: (string | null) | Category;
+  description?: string | null;
+  tenant: string | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders".
  */
 export interface Order {
@@ -326,23 +341,6 @@ export interface Order {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  /**
-   * Leave empty for top-level category.
-   */
-  parent?: (string | null) | Category;
-  description?: string | null;
-  tenant: string | Tenant;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
@@ -350,7 +348,7 @@ export interface Page {
   title: string;
   slug: string;
   content?: string | null;
-  status: 'published' | 'draft';
+  status?: ('published' | 'draft') | null;
   isSystem?: boolean | null;
   isHomepage?: boolean | null;
   isLandingPage?: boolean | null;
@@ -369,10 +367,26 @@ export interface Page {
           }
         | {
             title?: string | null;
+            category?: (string | null) | Category;
+            limit?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'productGrid';
+          }
+        | {
+            product: string | Product;
+            headline?: string | null;
+            fomoText?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'productSpotlight';
+          }
+        | {
+            title?: string | null;
             features?:
               | {
                   icon?: string | null;
-                  title?: string | null;
+                  title: string;
                   description?: string | null;
                   id?: string | null;
                 }[]
@@ -385,9 +399,9 @@ export interface Page {
             title?: string | null;
             reviews?:
               | {
-                  customerName?: string | null;
+                  customerName: string;
+                  comment: string;
                   rating?: number | null;
-                  comment?: string | null;
                   id?: string | null;
                 }[]
               | null;
@@ -399,8 +413,8 @@ export interface Page {
             title?: string | null;
             faqs?:
               | {
-                  question?: string | null;
-                  answer?: string | null;
+                  question: string;
+                  answer: string;
                   id?: string | null;
                 }[]
               | null;
@@ -768,6 +782,24 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        productGrid?:
+          | T
+          | {
+              title?: T;
+              category?: T;
+              limit?: T;
+              id?: T;
+              blockName?: T;
+            };
+        productSpotlight?:
+          | T
+          | {
+              product?: T;
+              headline?: T;
+              fomoText?: T;
+              id?: T;
+              blockName?: T;
+            };
         featureGrid?:
           | T
           | {
@@ -791,8 +823,8 @@ export interface PagesSelect<T extends boolean = true> {
                 | T
                 | {
                     customerName?: T;
-                    rating?: T;
                     comment?: T;
+                    rating?: T;
                     id?: T;
                   };
               id?: T;
