@@ -22,7 +22,7 @@ export default async function TenantStorefrontPage({ params, searchParams }: Pro
   let products: any[] = [];
   let categories: any[] = [];
 
-  // 🔍 ১. টেন্যান্ট ডাটাবেসে আছে কিনা খোঁজা (Subdomain Slug অথবা Custom Domain দিয়ে)
+  // 🔍 ১. টেন্যান্ট ডাটাবেসে আছে কিনা খোঁজা
   try {
     const tenantQuery = await payload.find({
       collection: 'tenants',
@@ -42,7 +42,7 @@ export default async function TenantStorefrontPage({ params, searchParams }: Pro
     console.error('Error fetching tenant:', error);
   }
 
-  // 🔒 ২. ডাটাবেসে নিবন্ধিত টেন্যান্ট না থাকলে সরাসরি Next.js 404 পেজে পাঠাবে
+  // 🔒 ২. ডাটাবেসে নিবন্ধিত টেন্যান্ট না থাকলে 404
   if (!tenant) {
     return notFound();
   }
@@ -101,15 +101,7 @@ export default async function TenantStorefrontPage({ params, searchParams }: Pro
     <StorefrontClient
       domain={domain}
       storeName={storeName}
-      tenantSettings={{
-        brandLogo: tenant?.brandLogo || '',
-        primaryColor: tenant?.primaryColor || '#8A1538',
-        announcementText:
-          tenant?.announcementText ||
-          '🎉 ক্যাশ অন ডেলিভারি (COD) সুবিধা উপলব্ধ | দ্রুত ডেলিভারি সার্ভিস',
-        whatsappNumber: tenant?.whatsappNumber || '',
-        metaPixelId: tenant?.metaPixelId || '',
-      }}
+      tenant={tenant}
       products={products}
       categories={categories}
       activeCategory={category || 'all'}
