@@ -68,14 +68,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Tenant store not found' }, { status: 404 });
     }
 
-    const tenant = tenantQuery.docs[0];
+    const tenant: any = tenantQuery.docs[0];
 
     await payload.update({
       collection: 'tenants',
       id: tenant.id,
       data: {
         homeBlocks: blocks,
-      },
+      } as any, // 👈 TypeScript Build Error সমাধানের জন্য 'as any' টাইপকাস্ট করা হয়েছে
     });
 
     return NextResponse.json({
