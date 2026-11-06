@@ -2,90 +2,6 @@ import { NextResponse } from 'next/server';
 import { getPayload } from 'payload';
 import configPromise from '@/payload.config';
 
-// 🔍 1. GET: সার্চ, ফিল্টারিং ও পেজিনেশন সহ প্রোডাক্ট ফেচ করা (Steps 81-85)
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const domain = searchParams.get('domain');
-    const query = searchParams.get('query') || '';
-    const category = searchParams.get('category');
-    const stockStatus = searchParams.get('stockStatus');
-    const page = Number(searchParams.get('page')) || 1;
-    const limit = Number(searchParams.get('limit')) || 10;
-
-    if (!domain) {
-      return NextResponse.json(
-        { error: 'টেন্যান্ট ডোমেইন (domain) প্যারামিটার আবশ্যক।' },
-        { status: 400 }
-      );
-    }
-
-    const payload = await getPayload({ config: configPromise });
-
-    // 1. Fetch Tenant
-    const tenantQuery = await payload.find({
-      collection: 'tenants',
-      where: { slug: { equals: domain } },
-      overrideAccess: true,
-    });
-
-    if (!tenantQuery.docs || tenantQuery.docs.length === 0) {
-      return NextResponse.json({ error: 'Tenant store not found' }, { status: 404 });
-    }
-
-    const tenant = tenantQuery.docs[0];
-
-    // 2. Build Where Query
-    const whereConditions: any[] = [{ tenant: { equals: tenant.id } }];
-
-    if (query.trim()) {
-      whereConditions.push({
-        title: { contains: query.trim() },
-      });
-    }
-
-    if (category && category !== 'all') {
-      whereConditions.push({
-        category: { equals: category },
-      });
-    }
-
-    if (stockStatus && stockStatus !== 'all') {
-      whereConditions.push({
-        'inventory.stockStatus': { equals: stockStatus },
-      });
-    }
-
-    // 3. Query Products with Depth Population
-    const productsDoc = await payload.find({
-      collection: 'products',
-      where: {
-        and: whereConditions,
-      },
-      sort: '-createdAt',
-      page,
-      limit,
-      depth: 2,
-      overrideAccess: true,
-    });
-
-    return NextResponse.json({
-      success: true,
-      products: productsDoc.docs,
-      totalDocs: productsDoc.totalDocs,
-      totalPages: productsDoc.totalPages,
-      page: productsDoc.page,
-    });
-  } catch (error: any) {
-    console.error('Products Fetch Error:', error);
-    return NextResponse.json(
-      { error: 'প্রোডাক্ট তালিকা লোড করতে সমস্যা হয়েছে।' },
-      { status: 500 }
-    );
-  }
-}
-
-// ➕ 2. POST: নতুন প্রোডাক্ট সেভ করা (Steps 71-75)
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -105,7 +21,7 @@ export async function POST(request: Request) {
       stockStatus = 'in_stock',
       digitalFileUrl,
       externalUrl,
-      attributes = [],
+      attributes,
       variations = [],
       image,
       featuredImage,
@@ -142,30 +58,67 @@ export async function POST(request: Request) {
       .toLowerCase()
       .replace(/[^a-z0-9-]/g, '-')
       .replace(/-+/g, '-')
-      .replace(/^-+|-+\$/g, '');
+      .replace(/^-+|-+$/g, '');
 
-    // 3. Process Gallery Images
+    // 3. Process & Sanitize Gallery Images (Fixes Image Uri Error)
     const mainImageUrl = image || featuredImage || '';
-    const allImages = [
-      ...(mainImageUrl ? [{ url: mainImageUrl }] : []),
-      ...(Array.isArray(galleryImages)
-        ? galleryImages.map((imgUrl: any) => ({
-            url: typeof imgUrl === 'string' ? imgUrl : imgUrl.url,
-          }))
-        : []),
-    ];
+    const allImages: { url: string }[] = [];
 
-    if (allImages.length === 0) {
-      allImages.push({ url: 'https://via.placeholder.com/600x600?text=No+Image' });
+    if (mainImageUrl && typeof mainImageUrl === 'string' && mainImageUrl.trim()) {
+      allImages.push({ url: mainImageUrl.trim() });
     }
 
-    // 4. Create Product Document in MongoDB
+    if (Array.isArray(galleryImages)) {
+      galleryImages.forEach((imgUrl: any) => {
+        const urlStr = typeof imgUrl === 'string' ? imgUrl : imgUrl?.url;
+        if (urlStr && typeof urlStr === 'string' && urlStr.trim() && urlStr !== mainImageUrl) {
+          allImages.push({ url: urlStr.trim() });
+        }
+      });
+    }
+
+    if (allImages.length === 0) {
+      allImages.push({ url: '[suspicious link removed]' });
+    }
+
+    // 4. Transform Attributes (Fixes 'অ্যাট্রিবিউট অপশনসমূহ' Mismatch Error)
+    let formattedAttributes: any[] = [];
+    const isVariableProduct = (productType || type) === 'variable';
+
+    if (isVariableProduct && attributes) {
+      if (Array.isArray(attributes)) {
+        formattedAttributes = attributes;
+      } else if (typeof attributes === 'object' && attributes !== null) {
+        formattedAttributes = Object.keys(attributes)
+          .filter((key) => Array.isArray(attributes[key]) && attributes[key].length > 0)
+          .map((key) => ({
+            name: key,
+            options: attributes[key].map((val: string) => ({ value: val })),
+          }));
+      }
+    }
+
+    // 5. Transform Variations
+    let formattedVariations: any[] = [];
+    if (isVariableProduct && Array.isArray(variations)) {
+      formattedVariations = variations.map((v: any) => ({
+        sku: v.sku || '',
+        color: v.attributes?.find((a: any) => a.attrName === 'Color' || a.attrName === 'color')?.option || '',
+        size: v.attributes?.find((a: any) => a.attrName === 'Size' || a.attrName === 'size')?.option || '',
+        price: Number(v.price) || Number(price),
+        regularPrice: Number(v.regularPrice || v.price) || Number(price),
+        stockQuantity: Number(v.stockQuantity) || 5,
+        image: v.image || '',
+      }));
+    }
+
+    // 6. Create Product Document in Payload CMS
     const newProduct = await payload.create({
       collection: 'products',
       data: {
         title,
         slug: finalSlug || `prod-${Date.now()}`,
-        type: productType || type || 'simple',
+        type: isVariableProduct ? 'variable' : 'simple',
         price: Number(price),
         regularPrice: regularPrice ? Number(regularPrice) : Number(price),
         salePrice: salePrice ? Number(salePrice) : undefined,
@@ -179,8 +132,8 @@ export async function POST(request: Request) {
               ? 'in_stock'
               : 'out_of_stock',
         },
-        attributes: attributes || [],
-        variations: variations || [],
+        attributes: formattedAttributes,
+        variations: formattedVariations,
         category: category || undefined,
         brand: brand || undefined,
         digitalFileUrl: digitalFileUrl || undefined,
