@@ -7,18 +7,33 @@ type HeaderLink = {
   url: string;
 };
 
-type SiteBuilderTabProps = {
-  domain?: string;
-  activeSubTab?: 'navigation' | 'branding' | 'conversion';
+type PageOption = {
+  id: string;
+  title: string;
+  slug: string;
 };
 
-export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' }: SiteBuilderTabProps) {
-  const [subTab, setSubTab] = useState<'branding' | 'header' | 'footer' | 'css'>(
-    activeSubTab === 'navigation' ? 'header' : 'branding'
-  );
+type SiteBuilderTabProps = {
+  domain?: string;
+  activeSubTab?: 'branding' | 'header' | 'footer' | 'css';
+};
 
+export default function SiteBuilderTab({ domain = '', activeSubTab = 'header' }: SiteBuilderTabProps) {
+  const [subTab, setSubTab] = useState<'branding' | 'header' | 'footer' | 'css'>(activeSubTab);
   const [saving, setSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  // Available Internal Pages for Dynamic Picker
+  const [availablePages, setAvailablePages] = useState<PageOption[]>([
+    { id: 'sys-home', title: 'হোমপেজ (Home)', slug: '/' },
+    { id: 'sys-shop', title: 'সব প্রোডাক্ট ক্যাটালগ (Shop)', slug: '/#products' },
+    { id: 'sys-about', title: 'আমাদের কথা (About Us)', slug: '/about-us' },
+    { id: 'sys-[#products]', title: 'প্রোডাক্ট গ্রিড', slug: '/#products' },
+    { id: 'sys-contact', title: 'যোগাযোগ (Contact Us)', slug: '/contact-us' },
+    { id: 'sys-privacy', title: 'প্রাইভেসি পলিসি (Privacy Policy)', slug: '/privacy-policy' },
+    { id: 'sys-terms', title: 'সেবার শর্তাবলী (Terms & Conditions)', slug: '/terms-and-conditions' },
+    { id: 'sys-return', title: 'রিটার্ন ও রিফান্ড নীতি (Return Policy)', slug: '/return-refund-policy' },
+  ]);
 
   // Theme Settings State
   const [theme, setTheme] = useState({
@@ -58,23 +73,31 @@ export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' 
     setTimeout(() => setToastMsg(null), 3500);
   };
 
-  // Load Existing Theme Settings
+  // Load Existing Theme Settings & Tenant Pages
   useEffect(() => {
-    const loadTheme = async () => {
+    const loadData = async () => {
       try {
-        const res = await fetch(`/api/merchant/theme-settings?domain=${domain}`);
-        const data = await res.json();
-        if (res.ok && data.success && data.themeSettings) {
-          setTheme((prev) => ({ ...prev, ...data.themeSettings }));
+        // Load Theme Settings
+        const themeRes = await fetch(`/api/merchant/theme-settings?domain=${domain}`);
+        const themeData = await themeRes.json();
+        if (themeRes.ok && themeData.success && themeData.themeSettings) {
+          setTheme((prev) => ({ ...prev, ...themeData.themeSettings }));
+        }
+
+        // Load Internal Pages List for Picker
+        const pagesRes = await fetch(`/api/merchant/pages?domain=${domain}`);
+        const pagesData = await pagesRes.json();
+        if (pagesRes.ok && pagesData.success && Array.isArray(pagesData.pages)) {
+          setAvailablePages(pagesData.pages);
         }
       } catch (err) {
-        console.error('Failed to load theme settings:', err);
+        console.error('Failed to load site builder data:', err);
       }
     };
-    if (domain) loadTheme();
+    if (domain) loadData();
   }, [domain]);
 
-  // Save Theme to API
+  // Save Theme Settings to API
   const handleSaveTheme = async () => {
     setSaving(true);
     try {
@@ -86,7 +109,7 @@ export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' 
 
       const data = await res.json();
       if (res.ok && data.success) {
-        showToast('🎉 নেভিগেশন ও থিম সেটিং লাইভ স্টোরফ্রন্টে সেভ হয়েছে!');
+        showToast('🎉 নেভিগেশন ও গ্লোবাল থিম সেটিং সফলভাবে সেভ হয়েছে!');
       } else {
         showToast('⚠️ সেটিং সেভ করতে সমস্যা হয়েছে!');
       }
@@ -101,7 +124,7 @@ export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' 
   const handleAddLink = () => {
     setTheme({
       ...theme,
-      headerLinks: [...theme.headerLinks, { label: 'নতুন লিংক', url: '/' }],
+      headerLinks: [...theme.headerLinks, { label: 'নতুন পেজ', url: '/' }],
     });
   };
 
@@ -111,9 +134,28 @@ export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' 
     setTheme({ ...theme, headerLinks: updatedLinks });
   };
 
+  const handleSelectInternalPage = (index: number, pageSlug: string, pageTitle: string) => {
+    const updatedLinks = [...theme.headerLinks];
+    updatedLinks[index].url = pageSlug;
+    if (!updatedLinks[index].label || updatedLinks[index].label === 'নতুন পেজ') {
+      updatedLinks[index].label = pageTitle.split(' (')[0];
+    }
+    setTheme({ ...theme, headerLinks: updatedLinks });
+  };
+
   const handleRemoveLink = (index: number) => {
     const updatedLinks = theme.headerLinks.filter((_, i) => i !== index);
     setTheme({ ...theme, headerLinks: updatedLinks });
+  };
+
+  const handleMoveLink = (index: number, direction: 'up' | 'down') => {
+    if ((direction === 'up' && index === 0) || (direction === 'down' && index === theme.headerLinks.length - 1)) return;
+    const targetIdx = direction === 'up' ? index - 1 : index + 1;
+    const updated = [...theme.headerLinks];
+    const temp = updated[index];
+    updated[index] = updated[targetIdx];
+    updated[targetIdx] = temp;
+    setTheme({ ...theme, headerLinks: updated });
   };
 
   return (
@@ -125,17 +167,17 @@ export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' 
         </div>
       )}
 
-      {/* Header Bar */}
+      {/* Header Action Bar */}
       <div className="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-black text-[#3B3433]">🧭 Navigation & Site Builder Engine</h2>
+            <h2 className="text-base font-black text-[#3B3433]">🧭 Global Site & Navigation Builder</h2>
             <span className="text-[9px] bg-[#8A1538] text-white font-extrabold px-2 py-0.5 rounded-full uppercase">
-              THEME MANAGER
+              SUITE V2.0
             </span>
           </div>
           <p className="text-[11px] text-stone-400 font-mono mt-0.5">
-            Configure Logo, Navigation Links, Header Layouts, Announcement Bar & Footer
+            Manage Logo, Theme Colors, Navigation Links, Header Layouts & Footer Settings
           </p>
         </div>
 
@@ -172,7 +214,7 @@ export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' 
         ))}
       </div>
 
-      {/* SUB-TAB 1: HEADER & NAVIGATION MANAGER */}
+      {/* SUB-TAB 1: HEADER & DYNAMIC NAVIGATION MANAGER */}
       {subTab === 'header' && (
         <div className="space-y-6">
           {/* Header Layout Picker */}
@@ -209,12 +251,117 @@ export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' 
             </div>
           </div>
 
+          {/* Dynamic Navigation Menu Items Manager with Internal Page Picker */}
+          <div className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-2xs space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div>
+                <h3 className="font-extrabold text-sm text-stone-900">🔗 নেভিগেশন মেনু এডিটর (Navigation Menu)</h3>
+                <p className="text-[11px] text-stone-400">
+                  ড্রপডাউন থেকে প্রজেক্টের যেকোনো পেজ সিলেক্ট করুন বা কাস্টম লিংক বসান
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddLink}
+                className="px-3.5 py-2 bg-stone-900 text-white font-extrabold text-xs rounded-xl hover:bg-stone-800 transition cursor-pointer"
+              >
+                + নতুন মেনু যোগ করুন
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {theme.headerLinks.map((link, idx) => (
+                <div key={idx} className="p-3.5 bg-stone-50 rounded-2xl border border-stone-200 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-mono font-black text-stone-400">Menu Item #{idx + 1}</span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        disabled={idx === 0}
+                        onClick={() => handleMoveLink(idx, 'up')}
+                        className="w-7 h-7 bg-white border border-stone-300 rounded-lg text-xs font-bold text-stone-600 hover:bg-stone-100 disabled:opacity-30 cursor-pointer"
+                        title="উপরে তুলুন"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        type="button"
+                        disabled={idx === theme.headerLinks.length - 1}
+                        onClick={() => handleMoveLink(idx, 'down')}
+                        className="w-7 h-7 bg-white border border-stone-300 rounded-lg text-xs font-bold text-stone-600 hover:bg-stone-100 disabled:opacity-30 cursor-pointer"
+                        title="নিচে নামান"
+                      >
+                        ▼
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveLink(idx)}
+                        className="w-7 h-7 bg-rose-50 border border-rose-200 rounded-lg text-xs font-bold text-rose-600 hover:bg-rose-100 cursor-pointer"
+                        title="ডিলিট করুন"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-xs font-bold">
+                    {/* Menu Label Name */}
+                    <div className="md:col-span-4">
+                      <label className="block text-stone-700 text-[11px] mb-1">মেনুর নাম (Label)</label>
+                      <input
+                        type="text"
+                        value={link.label}
+                        onChange={(e) => handleUpdateLink(idx, 'label', e.target.value)}
+                        placeholder="যেমন: হোম, শপ, আমাদের কথা"
+                        className="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-stone-800 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Internal Page Picker Select */}
+                    <div className="md:col-span-4">
+                      <label className="block text-stone-700 text-[11px] mb-1">ইন্টারনাল পেজ সিলেক্ট করুন</label>
+                      <select
+                        onChange={(e) => {
+                          const selected = availablePages.find((p) => p.slug === e.target.value);
+                          if (selected) {
+                            handleSelectInternalPage(idx, selected.slug, selected.title);
+                          }
+                        }}
+                        defaultValue=""
+                        className="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-stone-800 focus:outline-none cursor-pointer"
+                      >
+                        <option value="" disabled>
+                          -- পেজ বাছুন (Auto Link) --
+                        </option>
+                        {availablePages.map((page) => (
+                          <option key={page.id} value={page.slug}>
+                            {page.title} ({page.slug})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Target URL */}
+                    <div className="md:col-span-4">
+                      <label className="block text-stone-700 text-[11px] mb-1">কাস্টম ইউআরএল (Target URL)</label>
+                      <input
+                        type="text"
+                        value={link.url}
+                        onChange={(e) => handleUpdateLink(idx, 'url', e.target.value)}
+                        placeholder="যেমন: /about-us বা https://..."
+                        className="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl font-mono text-stone-800 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Top Announcement Bar Settings */}
           <div className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-2xs space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="font-extrabold text-sm text-stone-900">
-                📢 টপ অ্যানাউন্সমেন্ট বার (Top Notice Bar)
-              </h3>
+              <h3 className="font-extrabold text-sm text-stone-900">📢 টপ অ্যানাউন্সমেন্ট বার (Notice Bar)</h3>
               <input
                 type="checkbox"
                 checked={theme.showAnnouncement}
@@ -226,7 +373,7 @@ export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' 
             {theme.showAnnouncement && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-bold">
                 <div className="md:col-span-2">
-                  <label className="block text-stone-800 mb-1">অ্যানাউন্সমেন্ট মেসেজ (Notice Text)</label>
+                  <label className="block text-stone-800 mb-1">নোটিশ মেসেজ (Text)</label>
                   <input
                     type="text"
                     value={theme.announcementText}
@@ -274,58 +421,9 @@ export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' 
             )}
           </div>
 
-          {/* Dynamic Navigation Menu Items Manager */}
-          <div className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between border-b pb-3">
-              <div>
-                <h3 className="font-extrabold text-sm text-stone-900">🔗 নেভিগেশন লিংক ম্যানেজার (Header Links)</h3>
-                <p className="text-[11px] text-stone-400">হেডারে পছন্দের পেজ বা ফিল্টার কাস্টম লিংক যুক্ত করুন</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleAddLink}
-                className="px-3 py-1.5 bg-stone-900 text-white font-extrabold text-xs rounded-xl hover:bg-stone-800 transition cursor-pointer"
-              >
-                + নতুন লিংক যোগ করুন
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              {theme.headerLinks.map((link, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-3 bg-stone-50 rounded-xl border border-stone-200">
-                  <span className="text-xs font-mono text-stone-400 font-bold">#{idx + 1}</span>
-                  <input
-                    type="text"
-                    value={link.label}
-                    onChange={(e) => handleUpdateLink(idx, 'label', e.target.value)}
-                    placeholder="মেসেজ/টাইটেল (যেমন: শপ)"
-                    className="flex-1 px-3 py-1.5 bg-white border border-stone-300 rounded-lg text-xs font-bold text-stone-800"
-                  />
-                  <input
-                    type="text"
-                    value={link.url}
-                    onChange={(e) => handleUpdateLink(idx, 'url', e.target.value)}
-                    placeholder="ইউআরএল (যেমন: /about-us)"
-                    className="flex-1 px-3 py-1.5 bg-white border border-stone-300 rounded-lg text-xs font-mono text-stone-800"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveLink(idx)}
-                    className="text-stone-400 hover:text-rose-600 font-bold text-xs p-1"
-                    title="ডিলিট করুন"
-                  >
-                    🗑️
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Header Action Toggles */}
+          {/* Header Feature Toggles */}
           <div className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-2xs space-y-4 text-xs font-bold">
-            <h3 className="font-extrabold text-sm text-stone-900 border-b pb-3">
-              ⚙️ হেডার ফিচার টগল ও হেল্পলাইন
-            </h3>
+            <h3 className="font-extrabold text-sm text-stone-900 border-b pb-3">⚙️ হেডার অ্যাকশন ও হেল্পলাইন</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -377,15 +475,11 @@ export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' 
       {/* SUB-TAB 2: BRANDING & COLOR */}
       {subTab === 'branding' && (
         <div className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-2xs space-y-6">
-          <h3 className="font-extrabold text-sm text-stone-900 border-b pb-3">
-            🎨 ব্রান্ড কালার ও লোগো কনফিগারেশন
-          </h3>
+          <h3 className="font-extrabold text-sm text-stone-900 border-b pb-3">🎨 ব্র্যান্ডিং ও কালার প্যালেট</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-bold">
             <div className="space-y-3">
-              <label className="block text-stone-800 font-extrabold">
-                স্টোর প্রাইমারি থিম কালার (Primary Color)
-              </label>
+              <label className="block text-stone-800 font-extrabold">স্টোর প্রাইমারি థিম কালার</label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"
@@ -419,9 +513,7 @@ export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' 
       {/* SUB-TAB 3: FOOTER SETTINGS */}
       {subTab === 'footer' && (
         <div className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-2xs space-y-4 text-xs font-bold">
-          <h3 className="font-extrabold text-sm text-stone-900 border-b pb-3">
-            📌 ফুটার ইনফরমেশন ও সোশাল লিংক
-          </h3>
+          <h3 className="font-extrabold text-sm text-stone-900 border-b pb-3">📌 ফুটার ইনফরমেশন ও সোশাল লিংক</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -450,9 +542,7 @@ export default function SiteBuilderTab({ domain = '', activeSubTab = 'branding' 
       {/* SUB-TAB 4: CUSTOM CSS */}
       {subTab === 'css' && (
         <div className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-2xs space-y-4 text-xs font-bold">
-          <h3 className="font-extrabold text-sm text-stone-900 border-b pb-3">
-            💻 কাস্টম সিএসএস কোড ইনজেক্টর
-          </h3>
+          <h3 className="font-extrabold text-sm text-stone-900 border-b pb-3">💻 কাস্টম সিএসএস কোড ইনজেক্টর</h3>
 
           <div>
             <label className="block text-stone-800 mb-1">কাস্টম সিএসএস (Custom CSS)</label>

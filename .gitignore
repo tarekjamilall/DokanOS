@@ -44,3 +44,4 @@ full-codebase.md
 bundle-code.cjs
 bundle-code.js
 
+echo "*.rar" >> .gitignore
